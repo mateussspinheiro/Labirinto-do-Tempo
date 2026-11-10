@@ -10,6 +10,7 @@ import { WelcomeScene } from './scenes/WelcomeScene';
 import { MenuScene } from './scenes/MenuScene';
 import { LevelSelectScene } from './scenes/LevelSelectScene';
 import { GameScene } from './scenes/GameScene';
+import { HudScene } from './scenes/HudScene';
 import { HowToPlayScene } from './scenes/HowToPlayScene';
 import { ProgressScene } from './scenes/ProgressScene';
 import { SettingsScene } from './scenes/SettingsScene';
@@ -40,6 +41,7 @@ const config: Phaser.Types.Core.GameConfig = {
     MenuScene,
     LevelSelectScene,
     GameScene,
+    HudScene,
     HowToPlayScene,
     ProgressScene,
     SettingsScene,
@@ -47,4 +49,10 @@ const config: Phaser.Types.Core.GameConfig = {
   ],
 };
 
-new Phaser.Game(config);
+const game = new Phaser.Game(config);
+
+// Só no modo de desenvolvimento (npm run dev): deixa o jogo acessível
+// no console do navegador (digite "game") para ajudar a depurar.
+if (import.meta.env.DEV) {
+  (window as unknown as { game: Phaser.Game }).game = game;
+}

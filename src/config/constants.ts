@@ -27,6 +27,9 @@ export const COLORS = {
 export const TEXT_COLORS = {
   title: '#ffd54f',
   normal: '#e8eaf6',
+  success: '#81c784',
+  danger: '#ef5350',
+  portalOpen: '#ce93d8',
   muted: '#9fa8da',
   disabled: '#5c6080',
 };
@@ -67,6 +70,11 @@ export const MAZE_COLORS = {
   floor: 0x1b2040,
   floorLine: 0x232a52,
   player: 0x4caf50,
+  crystal: 0x4dd0e1,
+  crystalShine: 0xe0f7fa,
+  portalLocked: 0x616161,
+  portalOpen: 0xba68c8,
+  portalCore: 0xffd54f,
 };
 
 /** Chaves das texturas (imagens) usadas no jogo. */
@@ -74,7 +82,35 @@ export const TEXTURES = {
   WALL: 'wall',
   FLOOR: 'floor',
   PLAYER: 'player',
+  CRYSTAL: 'crystal',
+  PORTAL_LOCKED: 'portal-locked',
+  PORTAL_OPEN: 'portal-open',
 } as const;
+
+/** Quantidade de cristais necessária para liberar o portal. */
+export const CRYSTALS_TO_UNLOCK = 3;
+
+/**
+ * Eventos que a GameScene emite em this.game.events.
+ * A HudScene escuta esses eventos e só atualiza a interface.
+ */
+export const GAME_EVENTS = {
+  CRYSTAL_COLLECTED: 'crystal-collected', // (coletados: number, total: number)
+  PORTAL_UNLOCKED: 'portal-unlocked', // ()
+  TIME_CHANGED: 'time-changed', // (segundosRestantes: number)
+  PLAYER_HIT: 'player-hit', // (segundosPerdidos: number)
+} as const;
+
+/** Cores e tamanhos do HUD. */
+export const HUD = {
+  background: 0x0f1328,
+  border: 0x3949ab,
+  fontSize: 20,
+  messageDuration: 1800, // ms que a mensagem "Portal liberado!" fica na tela
+};
+
+/** Tempo (ms) entre entrar no portal e sair da fase. */
+export const LEVEL_END_DELAY = 1200;
 
 // ---------------- Jogador ----------------
 

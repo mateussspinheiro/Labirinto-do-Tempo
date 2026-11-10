@@ -65,6 +65,26 @@ export class PreloadScene extends Phaser.Scene {
     // Jogador: círculo verde
     g.fillStyle(MAZE_COLORS.player).fillCircle(12, 12, 12);
     g.generateTexture(TEXTURES.PLAYER, 24, 24);
+    g.clear();
+
+    // Cristal: losango azul-claro com um brilho
+    g.fillStyle(MAZE_COLORS.crystal).fillPoints(
+      [new Phaser.Math.Vector2(10, 0), new Phaser.Math.Vector2(20, 12), new Phaser.Math.Vector2(10, 24), new Phaser.Math.Vector2(0, 12)],
+      true,
+    );
+    g.fillStyle(MAZE_COLORS.crystalShine).fillRect(7, 6, 3, 6);
+    g.generateTexture(TEXTURES.CRYSTAL, 20, 24);
+    g.clear();
+
+    // Portal bloqueado: anel cinza
+    g.lineStyle(5, MAZE_COLORS.portalLocked).strokeCircle(14, 14, 11);
+    g.generateTexture(TEXTURES.PORTAL_LOCKED, 28, 28);
+    g.clear();
+
+    // Portal liberado: anel roxo com núcleo dourado
+    g.fillStyle(MAZE_COLORS.portalCore).fillCircle(14, 14, 6);
+    g.lineStyle(5, MAZE_COLORS.portalOpen).strokeCircle(14, 14, 11);
+    g.generateTexture(TEXTURES.PORTAL_OPEN, 28, 28);
 
     g.destroy();
   }
