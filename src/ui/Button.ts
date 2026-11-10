@@ -122,6 +122,11 @@ export class Button extends Phaser.GameObjects.Container implements Focusable {
 export class ButtonGroup {
   private buttons: Focusable[];
   private index = 0;
+  /** Quando false, o grupo ignora o teclado (ex.: com uma janela aberta por cima). */
+  private active = true;
+  private keyboard: Phaser.Input.Keyboard.KeyboardPlugin | null;
+  /** Tecla → ação. Guardamos para poder remover os "ouvintes" no destroy(). */
+  private handlers: Record<string, () => void>;
 
   constructor(scene: Phaser.Scene, buttons: Focusable[], startIndex = 0) {
     this.buttons = buttons;
@@ -131,21 +136,42 @@ export class ButtonGroup {
       button.onHover = () => this.focus(i);
     });
 
-    const keyboard = scene.input.keyboard;
-    if (keyboard) {
-      keyboard.on('keydown-UP', () => this.move(-1));
-      keyboard.on('keydown-W', () => this.move(-1));
-      keyboard.on('keydown-LEFT', () => this.sideways(-1));
-      keyboard.on('keydown-A', () => this.sideways(-1));
-      keyboard.on('keydown-DOWN', () => this.move(1));
-      keyboard.on('keydown-S', () => this.move(1));
-      keyboard.on('keydown-RIGHT', () => this.sideways(1));
-      keyboard.on('keydown-D', () => this.sideways(1));
-      keyboard.on('keydown-ENTER', () => this.buttons[this.index]?.press());
-      keyboard.on('keydown-SPACE', () => this.buttons[this.index]?.press());
+    const press = () => this.buttons[this.index]?.press();
+    this.handlers = {
+      'keydown-UP': () => this.move(-1),
+      'keydown-W': () => this.move(-1),
+      'keydown-DOWN': () => this.move(1),
+      'keydown-S': () => this.move(1),
+      'keydown-LEFT': () => this.sideways(-1),
+      'keydown-A': () => this.sideways(-1),
+      'keydown-RIGHT': () => this.sideways(1),
+      'keydown-D': () => this.sideways(1),
+      'keydown-ENTER': press,
+      'keydown-SPACE': press,
+    };
+
+    // Registra cada tecla; a ação só roda se o grupo estiver ativo
+    this.keyboard = scene.input.keyboard;
+    for (const [event, action] of Object.entries(this.handlers)) {
+      this.handlers[event] = () => {
+        if (this.active) action();
+      };
+      this.keyboard?.on(event, this.handlers[event]);
     }
 
     this.focus(this.firstEnabled(startIndex));
+  }
+
+  /** Liga/desliga a navegação por teclado deste grupo. */
+  setActive(active: boolean): void {
+    this.active = active;
+  }
+
+  /** Remove os "ouvintes" do teclado (usado ao fechar uma janela). */
+  destroy(): void {
+    for (const [event, handler] of Object.entries(this.handlers)) {
+      this.keyboard?.off(event, handler);
+    }
   }
 
   /** Seleciona o botão de posição i. */

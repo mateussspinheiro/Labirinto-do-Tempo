@@ -50,4 +50,20 @@ export interface LevelResult {
   points: number;
   /** 0 a 3 (derrota = 0). */
   stars: number;
+  /** true se bateu a melhor pontuação salva desta fase. */
+  newRecord: boolean;
+}
+
+/** Progresso salvo de uma fase. */
+export interface LevelProgress {
+  completed: boolean;
+  /** Menor tempo (em segundos) para concluir a fase. */
+  bestTime: number;
+  bestScore: number;
+  bestStars: number;
+}
+
+/** Tudo o que é salvo sobre o progresso: uma entrada por fase (chave = id). */
+export interface SaveData {
+  levels: Record<number, LevelProgress>;
 }

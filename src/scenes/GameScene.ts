@@ -25,10 +25,12 @@ import { Portal } from '../entities/Portal';
 import { getLevel } from '../levels';
 import { AudioManager } from '../systems/AudioManager';
 import { LevelLoader } from '../systems/LevelLoader';
+import { SaveManager } from '../systems/SaveManager';
 import { ScoreCalculator } from '../systems/ScoreCalculator';
 import type { LevelData, LevelResult } from '../types';
 import { textStyle } from '../ui/Theme';
 import type { HudSceneData } from './HudScene';
+import type { PauseSceneData } from './PauseScene';
 
 /** Dados recebidos ao iniciar a cena. */
 export interface GameSceneData {
@@ -84,8 +86,6 @@ export class GameScene extends Phaser.Scene {
     const hudData: HudSceneData = { totalCrystals: CRYSTALS_TO_UNLOCK, timeLimit: this.level.tempoLimite };
     this.scene.launch(SCENES.HUD, hudData);
 
-    // Ao sair desta cena (por qualquer motivo), fecha o HUD junto
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scene.stop(SCENES.HUD));
 
     // 6) Cronômetro: a cada 1 segundo chama tick(). O relógio da cena
     //    (this.time) para sozinho quando a cena é pausada.
@@ -95,8 +95,30 @@ export class GameScene extends Phaser.Scene {
     AudioManager.get().playMusic(SOUNDS.MUSIC_GAME);
     this.input.keyboard?.on('keydown', this.handleVolumeKeys, this);
 
-    // Temporário: ESC volta para a seleção de fases
-    this.input.keyboard?.on('keydown-ESC', () => this.scene.start(SCENES.LEVEL_SELECT));
+    // 8) Pausa: ESC ou P
+    this.input.keyboard?.on('keydown-ESC', this.pauseGame, this);
+    this.input.keyboard?.on('keydown-P', this.pauseGame, this);
+
+    // Ao voltar da pausa, "solta" todas as teclas: se o jogador soltou
+    // uma seta durante a pausa, a cena pausada não percebeu.
+    const onResume = () => this.input.keyboard?.resetKeys();
+    this.events.on(Phaser.Scenes.Events.RESUME, onResume);
+
+    // Ao sair desta cena (por qualquer motivo): fecha o HUD junto e
+    // remove o ouvinte acima (os eventos da cena continuam existindo
+    // entre uma partida e outra, então não podem se acumular).
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.events.off(Phaser.Scenes.Events.RESUME, onResume);
+      this.scene.stop(SCENES.HUD);
+    });
+  }
+
+  /** Pausa a partida e abre o menu de pausa por cima. */
+  private pauseGame(): void {
+    if (this.finished) return;
+    const data: PauseSceneData = { levelId: this.level.id };
+    this.scene.pause(); // para update, física, cronômetro e animações desta cena
+    this.scene.launch(SCENES.PAUSE, data);
   }
 
   /**
@@ -197,7 +219,10 @@ export class GameScene extends Phaser.Scene {
       damage: this.damageCount,
       points: score.points,
       stars: score.stars,
+      newRecord: false,
     };
+    // Salva o progresso (só conta se venceu) e descobre se foi recorde
+    result.newRecord = SaveManager.saveResult(result);
 
     // Mensagem rápida antes de trocar de tela
     const text = victory ? 'Fase concluída!' : 'Tempo esgotado!';

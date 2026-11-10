@@ -1,11 +1,19 @@
 // =============================================================
-// ProgressScene — tela "Progresso" (conteúdo será preenchido nas próximas etapas).
+// ProgressScene — mostra o progresso salvo no localStorage:
+// fases concluídas, melhores tempos, pontuações e estrelas.
 // =============================================================
 import Phaser from 'phaser';
-import { SCENES, GAME_WIDTH, GAME_HEIGHT, TEXT_COLORS } from '../config/constants';
+import { SCENES, COLORS, GAME_WIDTH, TEXT_COLORS } from '../config/constants';
+import { LEVELS } from '../levels';
+import { SaveManager } from '../systems/SaveManager';
 import { ButtonGroup } from '../ui/Button';
 import { addScreenFrame } from '../ui/ScreenFrame';
-import { textStyle } from '../ui/Theme';
+import { formatTime, starsText, textStyle } from '../ui/Theme';
+
+/** Posição x de cada coluna da tabela. */
+const COLUMNS = [50, 360, 480, 600, 710];
+const HEADER_Y = 140;
+const ROW_HEIGHT = 56;
 
 export class ProgressScene extends Phaser.Scene {
   constructor() {
@@ -14,7 +22,53 @@ export class ProgressScene extends Phaser.Scene {
 
   create(): void {
     const backButton = addScreenFrame(this, 'Progresso');
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'Em construção...', textStyle(22, TEXT_COLORS.muted)).setOrigin(0.5);
+
+    // ---- Cabeçalho da tabela ----
+    const headers = ['Fase', 'Situação', 'Melhor tempo', 'Recorde', 'Estrelas'];
+    headers.forEach((header, i) => {
+      this.add.text(COLUMNS[i], HEADER_Y, header, textStyle(18, TEXT_COLORS.muted, true)).setOrigin(i === 0 ? 0 : 0.5, 0.5);
+    });
+    this.add.rectangle(GAME_WIDTH / 2, HEADER_Y + 22, GAME_WIDTH - 80, 2, COLORS.buttonBorder);
+
+    // ---- Uma linha por fase ----
+    let totalScore = 0;
+    let completedCount = 0;
+
+    LEVELS.forEach((level, i) => {
+      const y = HEADER_Y + 60 + i * ROW_HEIGHT;
+      const progress = SaveManager.getLevelProgress(level.id);
+      const unlocked = SaveManager.isLevelUnlocked(level.id);
+
+      let status = 'Bloqueada';
+      let color: string = TEXT_COLORS.disabled;
+      if (progress?.completed) {
+        status = 'Concluída';
+        color = TEXT_COLORS.success;
+        totalScore += progress.bestScore;
+        completedCount++;
+      } else if (unlocked) {
+        status = 'Liberada';
+        color = TEXT_COLORS.normal;
+      }
+
+      const cells = [
+        `${level.id}. ${level.nome}`,
+        status,
+        progress ? formatTime(progress.bestTime) : '--:--',
+        progress ? String(progress.bestScore) : '-',
+        starsText(progress?.bestStars ?? 0),
+      ];
+      cells.forEach((cell, c) => {
+        this.add.text(COLUMNS[c], y, cell, textStyle(c === 0 ? 16 : 18, c === 1 ? color : TEXT_COLORS.normal)).setOrigin(c === 0 ? 0 : 0.5, 0.5);
+      });
+    });
+
+    // ---- Resumo ----
+    const summaryY = HEADER_Y + 60 + LEVELS.length * ROW_HEIGHT + 20;
+    this.add
+      .text(GAME_WIDTH / 2, summaryY, `Fases concluídas: ${completedCount}/${LEVELS.length}   ·   Pontuação total: ${totalScore}`, textStyle(20, TEXT_COLORS.title, true))
+      .setOrigin(0.5);
+
     new ButtonGroup(this, [backButton]);
   }
 }

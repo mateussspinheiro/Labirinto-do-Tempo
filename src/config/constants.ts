@@ -191,6 +191,7 @@ export const AUDIO_EVENTS = {
 /** Chaves usadas no localStorage do navegador. */
 export const STORAGE_KEYS = {
   SETTINGS: 'labirinto-do-tempo:settings',
+  PROGRESS: 'labirinto-do-tempo:progress',
 } as const;
 
 /** Nomes (chaves) das cenas, para evitar erros de digitação. */

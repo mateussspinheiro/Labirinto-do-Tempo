@@ -11,6 +11,7 @@ import { MenuScene } from './scenes/MenuScene';
 import { LevelSelectScene } from './scenes/LevelSelectScene';
 import { GameScene } from './scenes/GameScene';
 import { HudScene } from './scenes/HudScene';
+import { PauseScene } from './scenes/PauseScene';
 import { ResultScene } from './scenes/ResultScene';
 import { HowToPlayScene } from './scenes/HowToPlayScene';
 import { ProgressScene } from './scenes/ProgressScene';
@@ -43,6 +44,7 @@ const config: Phaser.Types.Core.GameConfig = {
     LevelSelectScene,
     GameScene,
     HudScene,
+    PauseScene,
     ResultScene,
     HowToPlayScene,
     ProgressScene,

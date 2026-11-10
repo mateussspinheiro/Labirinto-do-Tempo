@@ -4,8 +4,10 @@
 // =============================================================
 import type { LevelData } from '../types';
 import { level1 } from './level1';
+import { level2 } from './level2';
+import { level3 } from './level3';
 
-export const LEVELS: LevelData[] = [level1];
+export const LEVELS: LevelData[] = [level1, level2, level3];
 
 /** Procura uma fase pelo id (retorna undefined se não existir). */
 export function getLevel(id: number): LevelData | undefined {

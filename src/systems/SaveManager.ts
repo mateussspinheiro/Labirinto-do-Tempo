@@ -1,12 +1,15 @@
 // =============================================================
 // SaveManager.ts — lê e grava dados no localStorage do navegador.
+// Guarda duas coisas, em chaves separadas:
+//   - configurações (volume etc.);
+//   - progresso: fases concluídas, melhor tempo e melhor pontuação.
 //
 // O localStorage guarda apenas TEXTO. Por isso convertemos os
 // objetos para JSON ao salvar (JSON.stringify) e de volta ao
 // carregar (JSON.parse).
 // =============================================================
 import { AUDIO, STORAGE_KEYS } from '../config/constants';
-import type { Settings } from '../types';
+import type { LevelProgress, LevelResult, SaveData, Settings } from '../types';
 
 /** Configurações usadas na primeira vez que o jogo é aberto. */
 export const DEFAULT_SETTINGS: Settings = {
@@ -17,6 +20,8 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 export class SaveManager {
+  // ---------------- Configurações ----------------
+
   /** Carrega as configurações; se não houver nada salvo, usa o padrão. */
   static loadSettings(): Settings {
     const saved = SaveManager.read<Partial<Settings>>(STORAGE_KEYS.SETTINGS);
@@ -27,6 +32,54 @@ export class SaveManager {
 
   static saveSettings(settings: Settings): void {
     SaveManager.write(STORAGE_KEYS.SETTINGS, settings);
+  }
+
+  // ---------------- Progresso ----------------
+
+  static loadProgress(): SaveData {
+    return SaveManager.read<SaveData>(STORAGE_KEYS.PROGRESS) ?? { levels: {} };
+  }
+
+  /** Progresso de uma fase (undefined se o jogador nunca a concluiu). */
+  static getLevelProgress(levelId: number): LevelProgress | undefined {
+    return SaveManager.loadProgress().levels[levelId];
+  }
+
+  /** A fase 1 está sempre liberada; as outras, só depois de concluir a anterior. */
+  static isLevelUnlocked(levelId: number): boolean {
+    return levelId === 1 || SaveManager.getLevelProgress(levelId - 1)?.completed === true;
+  }
+
+  /**
+   * Registra o resultado de uma partida vencida, guardando só os
+   * MELHORES valores (menor tempo, maior pontuação, mais estrelas).
+   * @returns true se a pontuação foi um novo recorde
+   */
+  static saveResult(result: LevelResult): boolean {
+    if (!result.victory) return false;
+
+    const data = SaveManager.loadProgress();
+    const previous = data.levels[result.levelId];
+    const newRecord = !previous || result.points > previous.bestScore;
+
+    data.levels[result.levelId] = {
+      completed: true,
+      bestTime: previous ? Math.min(previous.bestTime, result.timeUsed) : result.timeUsed,
+      bestScore: previous ? Math.max(previous.bestScore, result.points) : result.points,
+      bestStars: previous ? Math.max(previous.bestStars, result.stars) : result.stars,
+    };
+
+    SaveManager.write(STORAGE_KEYS.PROGRESS, data);
+    return newRecord;
+  }
+
+  /** Apaga todo o progresso (as configurações de volume continuam). */
+  static clearProgress(): void {
+    try {
+      localStorage.removeItem(STORAGE_KEYS.PROGRESS);
+    } catch {
+      // Sem acesso ao localStorage: não há o que apagar
+    }
   }
 
   // ---------------- Funções auxiliares ----------------

@@ -25,6 +25,11 @@ export function textStyle(
   };
 }
 
+/** Estrelas em texto (ex.: 2 → "★★☆"). */
+export function starsText(stars: number, max = 3): string {
+  return '★'.repeat(stars) + '☆'.repeat(Math.max(0, max - stars));
+}
+
 /** Formata segundos como "mm:ss" (ex.: 75 → "01:15"). */
 export function formatTime(totalSeconds: number): string {
   const seconds = Math.max(0, Math.ceil(totalSeconds));

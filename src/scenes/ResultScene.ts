@@ -8,6 +8,7 @@
 import Phaser from 'phaser';
 import { SCENES, GAME_WIDTH, BUTTON, MAZE_COLORS, TEXT_COLORS } from '../config/constants';
 import { getLevel } from '../levels';
+import { SaveManager } from '../systems/SaveManager';
 import type { LevelResult } from '../types';
 import { Button, ButtonGroup } from '../ui/Button';
 import { formatTime, textStyle } from '../ui/Theme';
@@ -48,6 +49,12 @@ export class ResultScene extends Phaser.Scene {
     ];
     this.add.text(centerX, 290, lines.join('\n'), { ...textStyle(22), align: 'center', lineSpacing: 8 }).setOrigin(0.5);
 
+    // ---- Recorde ----
+    if (r.newRecord) {
+      const record = this.add.text(centerX + 190, 175, 'Novo recorde!', textStyle(22, TEXT_COLORS.title, true)).setOrigin(0.5).setAngle(-8);
+      this.tweens.add({ targets: record, scale: 1.15, duration: 500, yoyo: true, repeat: -1 });
+    }
+
     // ---- Botões ----
     const nextLevel = getLevel(r.levelId + 1);
     const buttonsY = 420;
@@ -55,8 +62,8 @@ export class ResultScene extends Phaser.Scene {
     const nextButton = new Button(this, centerX, buttonsY, 'Próxima fase', () =>
       this.scene.start(SCENES.GAME, { levelId: nextLevel!.id }),
     );
-    // Só dá para avançar se venceu e se existe uma próxima fase
-    nextButton.setEnabled(r.victory && nextLevel !== undefined);
+    // Só dá para avançar se existe uma próxima fase e ela está liberada
+    nextButton.setEnabled(nextLevel !== undefined && SaveManager.isLevelUnlocked(nextLevel.id));
 
     const retryButton = new Button(this, centerX, buttonsY + BUTTON.spacing, 'Jogar de novo', () =>
       this.scene.start(SCENES.GAME, { levelId: r.levelId }),
