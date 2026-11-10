@@ -42,6 +42,48 @@ export const BUTTON = {
   spacing: 66, // distância vertical entre botões empilhados
 };
 
+// ---------------- Labirinto ----------------
+
+/** Tamanho de cada quadrado (tile) do labirinto, em pixels. */
+export const TILE_SIZE = 32;
+
+/** Altura da faixa do HUD no topo da tela (o labirinto fica abaixo dela). */
+export const HUD_HEIGHT = 48;
+
+/** Símbolos usados nos mapas de texto das fases. */
+export const MAP_CHARS = {
+  WALL: '#',
+  FLOOR: '.',
+  PLAYER: 'P',
+  CRYSTAL: 'C',
+  PORTAL: 'X',
+  ENEMY: 'E',
+} as const;
+
+/** Cores do labirinto (usadas para gerar as texturas). */
+export const MAZE_COLORS = {
+  wall: 0x3f51b5,
+  wallBorder: 0x1a237e,
+  floor: 0x1b2040,
+  floorLine: 0x232a52,
+  player: 0x4caf50,
+};
+
+/** Chaves das texturas (imagens) usadas no jogo. */
+export const TEXTURES = {
+  WALL: 'wall',
+  FLOOR: 'floor',
+  PLAYER: 'player',
+} as const;
+
+// ---------------- Jogador ----------------
+
+export const PLAYER = {
+  speed: 160, // pixels por segundo
+  bodySize: 22, // caixa de colisão menor que o tile, para passar nos corredores
+  cornerAssist: 8, // força da "ajuda nas curvas" (alinha o jogador ao corredor)
+};
+
 /** Nomes (chaves) das cenas, para evitar erros de digitação. */
 export const SCENES = {
   BOOT: 'BootScene',

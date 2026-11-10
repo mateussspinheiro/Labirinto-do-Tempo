@@ -1,9 +1,12 @@
 // =============================================================
 // PreloadScene — carrega os assets (imagens e sons) e mostra
 // uma barra de carregamento enquanto isso acontece.
+// Por enquanto as imagens são formas desenhadas pelo próprio código
+// (texturas geradas), então não dependemos de arquivos externos.
 // =============================================================
 import Phaser from 'phaser';
-import { SCENES, GAME_WIDTH, GAME_HEIGHT, COLORS, TEXT_COLORS, FONT_FAMILY } from '../config/constants';
+import { SCENES, GAME_WIDTH, GAME_HEIGHT, COLORS, MAZE_COLORS, TEXTURES, TILE_SIZE } from '../config/constants';
+import { textStyle } from '../ui/Theme';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -17,6 +20,7 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.generateTextures();
     this.scene.start(SCENES.WELCOME);
   }
 
@@ -27,13 +31,7 @@ export class PreloadScene extends Phaser.Scene {
     const x = (GAME_WIDTH - barWidth) / 2;
     const y = GAME_HEIGHT / 2;
 
-    this.add
-      .text(GAME_WIDTH / 2, y - 40, 'Carregando...', {
-        fontFamily: FONT_FAMILY,
-        fontSize: '24px',
-        color: TEXT_COLORS.normal,
-      })
-      .setOrigin(0.5);
+    this.add.text(GAME_WIDTH / 2, y - 40, 'Carregando...', textStyle(24)).setOrigin(0.5);
 
     // Moldura da barra
     this.add.rectangle(x, y, barWidth, barHeight).setOrigin(0).setStrokeStyle(2, COLORS.primary);
@@ -43,5 +41,31 @@ export class PreloadScene extends Phaser.Scene {
     this.load.on('progress', (value: number) => {
       fill.width = (barWidth - 4) * value;
     });
+  }
+
+  /**
+   * Gera texturas simples desenhando com Graphics e salvando como imagem.
+   * Depois cada objeto do jogo usa a textura pelo nome (TEXTURES.*).
+   */
+  private generateTextures(): void {
+    const g = this.make.graphics({}, false); // "pincel" que não aparece na tela
+
+    // Parede: quadrado com borda escura
+    g.fillStyle(MAZE_COLORS.wallBorder).fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+    g.fillStyle(MAZE_COLORS.wall).fillRect(2, 2, TILE_SIZE - 4, TILE_SIZE - 4);
+    g.generateTexture(TEXTURES.WALL, TILE_SIZE, TILE_SIZE);
+    g.clear();
+
+    // Chão: quadrado escuro com uma linha sutil
+    g.fillStyle(MAZE_COLORS.floorLine).fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+    g.fillStyle(MAZE_COLORS.floor).fillRect(1, 1, TILE_SIZE - 1, TILE_SIZE - 1);
+    g.generateTexture(TEXTURES.FLOOR, TILE_SIZE, TILE_SIZE);
+    g.clear();
+
+    // Jogador: círculo verde
+    g.fillStyle(MAZE_COLORS.player).fillCircle(12, 12, 12);
+    g.generateTexture(TEXTURES.PLAYER, 24, 24);
+
+    g.destroy();
   }
 }

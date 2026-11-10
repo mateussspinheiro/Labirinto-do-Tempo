@@ -1,11 +1,12 @@
 // =============================================================
-// LevelSelectScene — tela "Escolha a fase" (conteúdo será preenchido nas próximas etapas).
+// LevelSelectScene — escolha da fase.
+// Cada fase da lista LEVELS vira um botão que inicia a GameScene.
 // =============================================================
 import Phaser from 'phaser';
-import { SCENES, GAME_WIDTH, GAME_HEIGHT, TEXT_COLORS } from '../config/constants';
-import { ButtonGroup } from '../ui/Button';
+import { SCENES, GAME_WIDTH, BUTTON } from '../config/constants';
+import { LEVELS } from '../levels';
+import { Button, ButtonGroup } from '../ui/Button';
 import { addScreenFrame } from '../ui/ScreenFrame';
-import { textStyle } from '../ui/Theme';
 
 export class LevelSelectScene extends Phaser.Scene {
   constructor() {
@@ -14,7 +15,15 @@ export class LevelSelectScene extends Phaser.Scene {
 
   create(): void {
     const backButton = addScreenFrame(this, 'Escolha a fase');
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'Em construção...', textStyle(22, TEXT_COLORS.muted)).setOrigin(0.5);
-    new ButtonGroup(this, [backButton]);
+
+    const firstY = 180;
+    const levelButtons = LEVELS.map(
+      (level, i) =>
+        new Button(this, GAME_WIDTH / 2, firstY + i * BUTTON.spacing * 1.3, `Fase ${level.id}: ${level.nome}`, () =>
+          this.scene.start(SCENES.GAME, { levelId: level.id }),
+        { width: 400 }),
+    );
+
+    new ButtonGroup(this, [...levelButtons, backButton]);
   }
 }
