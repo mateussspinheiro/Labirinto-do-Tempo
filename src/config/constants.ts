@@ -75,6 +75,10 @@ export const MAZE_COLORS = {
   portalLocked: 0x616161,
   portalOpen: 0xba68c8,
   portalCore: 0xffd54f,
+  enemy: 0xe53935,
+  enemyEye: 0xffffff,
+  star: 0xffd54f,
+  starEmpty: 0x3a3f5c,
 };
 
 /** Chaves das texturas (imagens) usadas no jogo. */
@@ -85,6 +89,7 @@ export const TEXTURES = {
   CRYSTAL: 'crystal',
   PORTAL_LOCKED: 'portal-locked',
   PORTAL_OPEN: 'portal-open',
+  ENEMY: 'enemy',
 } as const;
 
 /** Quantidade de cristais necessária para liberar o portal. */
@@ -109,8 +114,31 @@ export const HUD = {
   messageDuration: 1800, // ms que a mensagem "Portal liberado!" fica na tela
 };
 
-/** Tempo (ms) entre entrar no portal e sair da fase. */
+/** Tempo (ms) entre o fim da fase (vitória ou derrota) e a tela de resultado. */
 export const LEVEL_END_DELAY = 1200;
+
+/** Cronômetro: a partir de quantos segundos restantes o tempo fica vermelho. */
+export const TIME_WARNING_SECONDS = 10;
+
+// ---------------- Obstáculos ----------------
+
+export const OBSTACLE = {
+  damageSeconds: 5, // segundos que o jogador perde ao ser tocado
+  invulnerableMs: 1500, // tempo de invencibilidade depois do dano
+  blinkMs: 100, // velocidade do "piscar" do jogador
+  bodySize: 22,
+};
+
+// ---------------- Pontuação ----------------
+// pontos = 1000 + (tempo restante × 10) − (danos × 100), mínimo 0
+
+export const SCORE = {
+  base: 1000,
+  perSecondLeft: 10,
+  perDamage: 100,
+  threeStarsRatio: 0.5, // mais de 50% do tempo sobrando = 3 estrelas
+  twoStarsRatio: 0.25, // mais de 25% = 2 estrelas; senão 1
+};
 
 // ---------------- Jogador ----------------
 

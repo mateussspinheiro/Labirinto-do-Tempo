@@ -24,3 +24,11 @@ export function textStyle(
     fontStyle: bold ? 'bold' : 'normal',
   };
 }
+
+/** Formata segundos como "mm:ss" (ex.: 75 → "01:15"). */
+export function formatTime(totalSeconds: number): string {
+  const seconds = Math.max(0, Math.ceil(totalSeconds));
+  const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
+  const ss = String(seconds % 60).padStart(2, '0');
+  return `${mm}:${ss}`;
+}

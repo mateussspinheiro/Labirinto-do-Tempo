@@ -85,6 +85,12 @@ export class PreloadScene extends Phaser.Scene {
     g.fillStyle(MAZE_COLORS.portalCore).fillCircle(14, 14, 6);
     g.lineStyle(5, MAZE_COLORS.portalOpen).strokeCircle(14, 14, 11);
     g.generateTexture(TEXTURES.PORTAL_OPEN, 28, 28);
+    g.clear();
+
+    // Inimigo: bolinha vermelha com dois olhos
+    g.fillStyle(MAZE_COLORS.enemy).fillCircle(12, 12, 12);
+    g.fillStyle(MAZE_COLORS.enemyEye).fillCircle(8, 10, 3).fillCircle(16, 10, 3);
+    g.generateTexture(TEXTURES.ENEMY, 24, 24);
 
     g.destroy();
   }

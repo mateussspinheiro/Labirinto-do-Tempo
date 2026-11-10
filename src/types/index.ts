@@ -22,3 +22,24 @@ export interface Point {
   x: number;
   y: number;
 }
+
+/** Caminho de patrulha de um inimigo: ele vai e volta entre "a" e "b". */
+export interface PatrolPath {
+  a: Point;
+  b: Point;
+}
+
+/** Resultado de uma partida, enviado para a ResultScene. */
+export interface LevelResult {
+  levelId: number;
+  victory: boolean;
+  /** Segundos que sobraram no cronômetro. */
+  timeLeft: number;
+  /** Segundos que o jogador levou (tempoLimite - timeLeft). */
+  timeUsed: number;
+  /** Quantas vezes o jogador foi atingido. */
+  damage: number;
+  points: number;
+  /** 0 a 3 (derrota = 0). */
+  stars: number;
+}

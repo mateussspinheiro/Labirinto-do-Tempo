@@ -4,7 +4,7 @@
 // sprite e impede que ele atravesse as paredes (collider na GameScene).
 // =============================================================
 import Phaser from 'phaser';
-import { PLAYER, TEXTURES, TILE_SIZE } from '../config/constants';
+import { OBSTACLE, PLAYER, TEXTURES, TILE_SIZE } from '../config/constants';
 import type { Point } from '../types';
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
@@ -12,6 +12,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private wasd: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
   /** Canto do labirinto na tela, usado para saber onde fica o centro dos corredores. */
   private mazeOffset: Point;
+  private invulnerable = false;
 
   constructor(scene: Phaser.Scene, x: number, y: number, mazeOffset: Point) {
     super(scene, x, y, TEXTURES.PLAYER);
@@ -53,6 +54,31 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (dy !== 0 && dx === 0) vx = this.pullToLane(this.x, this.mazeOffset.x);
 
     this.setVelocity(vx, vy);
+  }
+
+  /** Se está invencível (logo depois de levar dano). */
+  isInvulnerable(): boolean {
+    return this.invulnerable;
+  }
+
+  /**
+   * Jogador foi atingido: pisca e fica invencível por alguns instantes,
+   * para não perder tempo várias vezes seguidas pelo mesmo inimigo.
+   */
+  hurt(): void {
+    this.invulnerable = true;
+    const blinks = Math.floor(OBSTACLE.invulnerableMs / (OBSTACLE.blinkMs * 2));
+    this.scene.tweens.add({
+      targets: this,
+      alpha: 0.2,
+      duration: OBSTACLE.blinkMs,
+      yoyo: true,
+      repeat: blinks - 1,
+      onComplete: () => {
+        this.setAlpha(1);
+        this.invulnerable = false;
+      },
+    });
   }
 
   /** Para o jogador (usado ao terminar a fase). Não usamos o nome "stop" porque o Sprite já tem um. */

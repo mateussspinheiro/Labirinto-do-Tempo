@@ -9,7 +9,7 @@
 // =============================================================
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, HUD_HEIGHT, MAP_CHARS, TEXTURES, TILE_SIZE } from '../config/constants';
-import type { LevelData, Point } from '../types';
+import type { LevelData, PatrolPath, Point } from '../types';
 
 /** Resultado da leitura do mapa. */
 export interface LoadedLevel {
@@ -17,7 +17,8 @@ export interface LoadedLevel {
   playerStart: Point;
   crystals: Point[];
   portal: Point;
-  enemies: Point[];
+  /** Caminho de patrulha de cada inimigo 'E'. */
+  enemies: PatrolPath[];
   /** Canto superior esquerdo do labirinto na tela (para centralizá-lo). */
   offset: Point;
 }
@@ -76,13 +77,40 @@ export class LevelLoader {
             result.portal = pos;
             break;
           case MAP_CHARS.ENEMY:
-            result.enemies.push(pos);
+            result.enemies.push(this.findPatrolPath(col, row));
             break;
         }
       });
     });
 
     return result;
+  }
+
+  /**
+   * Descobre o caminho de patrulha de um inimigo automaticamente:
+   * mede o corredor reto na horizontal e na vertical a partir do 'E'
+   * (até bater numa parede) e escolhe o mais comprido.
+   */
+  private findPatrolPath(col: number, row: number): PatrolPath {
+    const isFree = (c: number, r: number) => this.level.mapa[r]?.[c] !== undefined && this.level.mapa[r][c] !== MAP_CHARS.WALL;
+
+    // Anda para cada lado enquanto não encontrar parede
+    let left = col;
+    while (isFree(left - 1, row)) left--;
+    let right = col;
+    while (isFree(right + 1, row)) right++;
+    let up = row;
+    while (isFree(col, up - 1)) up--;
+    let down = row;
+    while (isFree(col, down + 1)) down++;
+
+    const horizontal = right - left;
+    const vertical = down - up;
+
+    if (horizontal >= vertical) {
+      return { a: this.tileToWorld(left, row), b: this.tileToWorld(right, row) };
+    }
+    return { a: this.tileToWorld(col, up), b: this.tileToWorld(col, down) };
   }
 
   /** Converte coluna/linha do mapa para o centro do tile em pixels. */
