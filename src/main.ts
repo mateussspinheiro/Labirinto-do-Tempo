@@ -7,6 +7,12 @@ import { GAME_WIDTH, GAME_HEIGHT, COLORS } from './config/constants';
 import { BootScene } from './scenes/BootScene';
 import { PreloadScene } from './scenes/PreloadScene';
 import { WelcomeScene } from './scenes/WelcomeScene';
+import { MenuScene } from './scenes/MenuScene';
+import { LevelSelectScene } from './scenes/LevelSelectScene';
+import { HowToPlayScene } from './scenes/HowToPlayScene';
+import { ProgressScene } from './scenes/ProgressScene';
+import { SettingsScene } from './scenes/SettingsScene';
+import { HelpScene } from './scenes/HelpScene';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO, // usa WebGL se disponível, senão Canvas
@@ -26,7 +32,17 @@ const config: Phaser.Types.Core.GameConfig = {
     },
   },
   // A primeira cena da lista é a que inicia automaticamente.
-  scene: [BootScene, PreloadScene, WelcomeScene],
+  scene: [
+    BootScene,
+    PreloadScene,
+    WelcomeScene,
+    MenuScene,
+    LevelSelectScene,
+    HowToPlayScene,
+    ProgressScene,
+    SettingsScene,
+    HelpScene,
+  ],
 };
 
 new Phaser.Game(config);
