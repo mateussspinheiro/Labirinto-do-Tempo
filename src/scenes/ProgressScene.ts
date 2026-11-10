@@ -24,10 +24,14 @@ export class ProgressScene extends Phaser.Scene {
     const backButton = addScreenFrame(this, 'Progresso');
 
     // ---- Cabeçalho da tabela ----
-    this.add.text(GAME_WIDTH / 2, 108, 'Seus melhores resultados em cada fase', textStyle(16, theme.text.muted)).setOrigin(0.5);
+    this.add
+      .text(GAME_WIDTH / 2, 108, 'Seus melhores resultados em cada fase', textStyle(16, theme.text.muted))
+      .setOrigin(0.5);
     const headers = ['Fase', 'Situação', 'Tempo', 'Pontos', 'Estrelas'];
     headers.forEach((header, i) => {
-      this.add.text(COLUMNS[i], HEADER_Y, header, textStyle(18, theme.text.muted, true)).setOrigin(i === 0 ? 0 : 0.5, 0.5);
+      this.add
+        .text(COLUMNS[i], HEADER_Y, header, textStyle(18, theme.text.muted, true))
+        .setOrigin(i === 0 ? 0 : 0.5, 0.5);
     });
     this.add.rectangle(GAME_WIDTH / 2, HEADER_Y + 22, GAME_WIDTH - 80, 2, theme.colors.buttonBorder);
 
@@ -60,14 +64,21 @@ export class ProgressScene extends Phaser.Scene {
         starsText(progress?.bestStars ?? 0),
       ];
       cells.forEach((cell, c) => {
-        this.add.text(COLUMNS[c], y, cell, textStyle(c === 0 ? 16 : 18, c === 1 ? color : theme.text.normal)).setOrigin(c === 0 ? 0 : 0.5, 0.5);
+        this.add
+          .text(COLUMNS[c], y, cell, textStyle(c === 0 ? 16 : 18, c === 1 ? color : theme.text.normal))
+          .setOrigin(c === 0 ? 0 : 0.5, 0.5);
       });
     });
 
     // ---- Resumo ----
     const summaryY = HEADER_Y + 60 + LEVELS.length * ROW_HEIGHT + 20;
     this.add
-      .text(GAME_WIDTH / 2, summaryY, `Fases concluídas: ${completedCount}/${LEVELS.length}   ·   Pontuação total: ${totalScore}`, textStyle(20, theme.text.title, true))
+      .text(
+        GAME_WIDTH / 2,
+        summaryY,
+        `Fases concluídas: ${completedCount}/${LEVELS.length}   ·   Pontuação total: ${totalScore}`,
+        textStyle(20, theme.text.title, true),
+      )
       .setOrigin(0.5);
 
     new ButtonGroup(this, [backButton]);

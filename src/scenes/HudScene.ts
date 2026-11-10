@@ -54,11 +54,18 @@ export class HudScene extends Phaser.Scene {
 
   create(): void {
     // Faixa de fundo no topo da tela
-    this.add.rectangle(0, 0, GAME_WIDTH, HUD_HEIGHT, theme.colors.hudBackground).setOrigin(0).setStrokeStyle(2, theme.colors.hudBorder);
+    this.add
+      .rectangle(0, 0, GAME_WIDTH, HUD_HEIGHT, theme.colors.hudBackground)
+      .setOrigin(0)
+      .setStrokeStyle(2, theme.colors.hudBorder);
 
     const middleY = HUD_HEIGHT / 2;
-    this.crystalText = this.add.text(16, middleY, '', textStyle(HUD.fontSize, theme.text.normal, true)).setOrigin(0, 0.5);
-    this.portalText = this.add.text(190, middleY, '', textStyle(HUD.fontSize, theme.text.muted, true)).setOrigin(0, 0.5);
+    this.crystalText = this.add
+      .text(16, middleY, '', textStyle(HUD.fontSize, theme.text.normal, true))
+      .setOrigin(0, 0.5);
+    this.portalText = this.add
+      .text(190, middleY, '', textStyle(HUD.fontSize, theme.text.muted, true))
+      .setOrigin(0, 0.5);
     this.timeText = this.add.text(420, middleY, '', textStyle(HUD.fontSize, theme.text.normal, true)).setOrigin(0, 0.5);
 
     this.updateCrystals(0, this.totalCrystals);
@@ -108,7 +115,12 @@ export class HudScene extends Phaser.Scene {
   /** Mostra "-5s" subindo e sumindo ao lado do tempo. */
   private showHit(secondsLost: number): void {
     const label = this.add
-      .text(this.timeText.x + this.timeText.width + 12, HUD_HEIGHT / 2, `-${secondsLost}s`, textStyle(HUD.fontSize, theme.text.danger, true))
+      .text(
+        this.timeText.x + this.timeText.width + 12,
+        HUD_HEIGHT / 2,
+        `-${secondsLost}s`,
+        textStyle(HUD.fontSize, theme.text.danger, true),
+      )
       .setOrigin(0, 0.5);
     this.tweens.add({ targets: label, y: label.y + 30, alpha: 0, duration: 900, onComplete: () => label.destroy() });
   }
@@ -144,7 +156,15 @@ export class HudScene extends Phaser.Scene {
     // Corpo do alto-falante: um retângulo e um trapézio (o "cone")
     g.fillStyle(color);
     g.fillRect(-12, -4, 5, 8);
-    g.fillPoints([new Phaser.Math.Vector2(-7, -4), new Phaser.Math.Vector2(-1, -9), new Phaser.Math.Vector2(-1, 9), new Phaser.Math.Vector2(-7, 4)], true);
+    g.fillPoints(
+      [
+        new Phaser.Math.Vector2(-7, -4),
+        new Phaser.Math.Vector2(-1, -9),
+        new Phaser.Math.Vector2(-1, 9),
+        new Phaser.Math.Vector2(-7, 4),
+      ],
+      true,
+    );
 
     if (silent) {
       // "X" vermelho de mudo

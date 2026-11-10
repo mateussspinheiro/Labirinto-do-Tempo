@@ -97,7 +97,8 @@ export class LevelLoader {
    * (até bater numa parede) e escolhe o mais comprido.
    */
   private findPatrolPath(col: number, row: number): PatrolPath {
-    const isFree = (c: number, r: number) => this.level.mapa[r]?.[c] !== undefined && this.level.mapa[r][c] !== MAP_CHARS.WALL;
+    const isFree = (c: number, r: number) =>
+      this.level.mapa[r]?.[c] !== undefined && this.level.mapa[r][c] !== MAP_CHARS.WALL;
 
     // Anda para cada lado enquanto não encontrar parede
     let left = col;

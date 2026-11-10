@@ -13,6 +13,7 @@ import type { LevelResult } from '../types';
 import { Button, ButtonGroup } from '../ui/Button';
 import { formatTime, textStyle, theme } from '../ui/Theme';
 import { goToScene } from '../ui/Transition';
+import type { GameSceneData } from './GameScene';
 
 const MAX_STARS = 3;
 
@@ -52,7 +53,10 @@ export class ResultScene extends Phaser.Scene {
 
     // ---- Recorde ----
     if (r.newRecord) {
-      const record = this.add.text(centerX + 190, 175, 'Novo recorde!', textStyle(22, theme.text.title, true)).setOrigin(0.5).setAngle(-8);
+      const record = this.add
+        .text(centerX + 190, 175, 'Novo recorde!', textStyle(22, theme.text.title, true))
+        .setOrigin(0.5)
+        .setAngle(-8);
       this.tweens.add({ targets: record, scale: 1.15, duration: 500, yoyo: true, repeat: -1 });
     }
 
@@ -61,15 +65,17 @@ export class ResultScene extends Phaser.Scene {
     const buttonsY = 420;
 
     const nextButton = new Button(this, centerX, buttonsY, 'Próxima fase', () =>
-      goToScene(this, SCENES.GAME, { levelId: nextLevel!.id }),
+      goToScene(this, SCENES.GAME, { levelId: nextLevel!.id } satisfies GameSceneData),
     );
     // Só dá para avançar se existe uma próxima fase e ela está liberada
     nextButton.setEnabled(nextLevel !== undefined && SaveManager.isLevelUnlocked(nextLevel.id));
 
     const retryButton = new Button(this, centerX, buttonsY + BUTTON.spacing, 'Jogar de novo', () =>
-      goToScene(this, SCENES.GAME, { levelId: r.levelId }),
+      goToScene(this, SCENES.GAME, { levelId: r.levelId } satisfies GameSceneData),
     );
-    const menuButton = new Button(this, centerX, buttonsY + BUTTON.spacing * 2, 'Menu', () => goToScene(this, SCENES.MENU));
+    const menuButton = new Button(this, centerX, buttonsY + BUTTON.spacing * 2, 'Menu', () =>
+      goToScene(this, SCENES.MENU),
+    );
 
     // Na derrota, o foco começa em "Jogar de novo"
     new ButtonGroup(this, [nextButton, retryButton, menuButton], nextButton.isEnabled() ? 0 : 1);

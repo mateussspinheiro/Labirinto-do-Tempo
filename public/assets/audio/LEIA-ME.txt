@@ -1,0 +1,10 @@
+Pasta para arquivos de áudio (opcional).
+
+O jogo não precisa de arquivos aqui: as músicas e os efeitos são gerados
+pelo código com a Web Audio API (src/systems/SoundSynth.ts).
+
+Para usar sons de arquivo (ex.: .ogg ou .mp3 com licença CC0):
+1. coloque os arquivos nesta pasta;
+2. descomente as linhas this.load.audio(...) em src/scenes/PreloadScene.ts,
+   ajustando os nomes dos arquivos;
+3. registre a origem e a licença de cada arquivo no CREDITOS.md.

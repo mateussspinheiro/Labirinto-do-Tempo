@@ -31,10 +31,19 @@ export function showConfirmDialog(
 
   // Fundo escuro que cobre a tela toda. Ele é "interativo" só para
   // bloquear cliques nos botões que ficaram por baixo.
-  const shade = scene.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, theme.colors.background, 0.8).setOrigin(0).setInteractive();
-  const panel = scene.add.rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, theme.colors.panel).setStrokeStyle(3, theme.colors.accent);
+  const shade = scene.add
+    .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, theme.colors.background, 0.8)
+    .setOrigin(0)
+    .setInteractive();
+  const panel = scene.add
+    .rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, theme.colors.panel)
+    .setStrokeStyle(3, theme.colors.accent);
   const text = scene.add
-    .text(centerX, centerY - 50, message, { ...textStyle(22, theme.text.normal), align: 'center', wordWrap: { width: PANEL_WIDTH - 60 } })
+    .text(centerX, centerY - 50, message, {
+      ...textStyle(22, theme.text.normal),
+      align: 'center',
+      wordWrap: { width: PANEL_WIDTH - 60 },
+    })
     .setOrigin(0.5);
 
   const close = () => {
@@ -43,10 +52,17 @@ export function showConfirmDialog(
     parentGroup.setActive(true);
   };
 
-  const yesButton = new Button(scene, centerX - 120, centerY + 60, confirmLabel, () => {
-    close();
-    onConfirm();
-  }, { width: 210 });
+  const yesButton = new Button(
+    scene,
+    centerX - 120,
+    centerY + 60,
+    confirmLabel,
+    () => {
+      close();
+      onConfirm();
+    },
+    { width: 210 },
+  );
   const noButton = new Button(scene, centerX + 120, centerY + 60, 'Cancelar', close, { width: 210 });
 
   [shade, panel, text, yesButton, noButton].forEach((obj) => obj.setDepth(DIALOG_DEPTH));

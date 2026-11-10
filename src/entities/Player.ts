@@ -42,8 +42,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   /** Chamado a cada quadro pela GameScene: lê o teclado e define a velocidade. */
   updateMovement(): void {
     // -1, 0 ou 1 em cada eixo, conforme as teclas pressionadas
-    const dx = Number(this.cursors.right.isDown || this.wasd.right.isDown) - Number(this.cursors.left.isDown || this.wasd.left.isDown);
-    const dy = Number(this.cursors.down.isDown || this.wasd.down.isDown) - Number(this.cursors.up.isDown || this.wasd.up.isDown);
+    const dx =
+      Number(this.cursors.right.isDown || this.wasd.right.isDown) -
+      Number(this.cursors.left.isDown || this.wasd.left.isDown);
+    const dy =
+      Number(this.cursors.down.isDown || this.wasd.down.isDown) - Number(this.cursors.up.isDown || this.wasd.up.isDown);
 
     // Vetor normalizado: andar na diagonal não fica mais rápido
     const direction = new Phaser.Math.Vector2(dx, dy).normalize();

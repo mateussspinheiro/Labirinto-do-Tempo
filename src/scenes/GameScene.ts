@@ -7,7 +7,16 @@
 // Toda informação para o HUD sai daqui como EVENTO em this.game.events.
 // =============================================================
 import Phaser from 'phaser';
-import { SCENES, GAME_EVENTS, CRYSTALS_TO_UNLOCK, LEVEL_END_DELAY, OBSTACLE, SOUNDS, GAME_WIDTH, GAME_HEIGHT } from '../config/constants';
+import {
+  SCENES,
+  GAME_EVENTS,
+  CRYSTALS_TO_UNLOCK,
+  LEVEL_END_DELAY,
+  OBSTACLE,
+  SOUNDS,
+  GAME_WIDTH,
+  GAME_HEIGHT,
+} from '../config/constants';
 import { Crystal } from '../entities/Crystal';
 import { Obstacle } from '../entities/Obstacle';
 import { Player } from '../entities/Player';
@@ -79,7 +88,6 @@ export class GameScene extends Phaser.Scene {
     if (showTip) SaveManager.markTipShown();
     const hudData: HudSceneData = { totalCrystals: CRYSTALS_TO_UNLOCK, timeLimit: this.level.tempoLimite, showTip };
     this.scene.launch(SCENES.HUD, hudData);
-
 
     // 6) Cronômetro: a cada 1 segundo chama tick(). O relógio da cena
     //    (this.time) para sozinho quando a cena é pausada.
@@ -221,7 +229,10 @@ export class GameScene extends Phaser.Scene {
     // Mensagem rápida antes de trocar de tela
     const text = victory ? 'Fase concluída!' : 'Tempo esgotado!';
     const color = victory ? theme.text.success : theme.text.danger;
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, text, textStyle(44, color, true)).setOrigin(0.5).setStroke('#000000', 6);
+    this.add
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, text, textStyle(44, color, true))
+      .setOrigin(0.5)
+      .setStroke('#000000', 6);
 
     this.time.delayedCall(LEVEL_END_DELAY, () => {
       fadeOut(this.scene.get(SCENES.HUD)); // o HUD escurece junto com a partida

@@ -9,12 +9,14 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "sprites": "node scripts/gerar-sprites.mjs"
+    "sprites": "node scripts/gerar-sprites.mjs",
+    "format": "prettier --write src scripts"
   },
   "dependencies": {
     "phaser": "^4.2.1"
   },
   "devDependencies": {
+    "prettier": "^3.9.10",
     "typescript": "^7.0.2",
     "vite": "^8.3.7"
   }

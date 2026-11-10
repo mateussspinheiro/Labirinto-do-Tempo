@@ -12,7 +12,7 @@ import { AUDIO, STORAGE_KEYS } from '../config/constants';
 import type { LevelProgress, LevelResult, SaveData, Settings } from '../types';
 
 /** Configurações usadas na primeira vez que o jogo é aberto. */
-export const DEFAULT_SETTINGS: Settings = {
+const DEFAULT_SETTINGS: Settings = {
   volumeGeral: AUDIO.defaultMaster,
   volumeMusica: AUDIO.defaultMusic,
   volumeEfeitos: AUDIO.defaultSfx,

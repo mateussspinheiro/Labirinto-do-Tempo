@@ -13,6 +13,7 @@ import { Button, ButtonGroup } from '../ui/Button';
 import { addScreenFrame } from '../ui/ScreenFrame';
 import { formatTime, starsText, textStyle, theme } from '../ui/Theme';
 import { goToScene } from '../ui/Transition';
+import type { GameSceneData } from './GameScene';
 
 /** Distância vertical entre as fases na lista. */
 const ROW_HEIGHT = 110;
@@ -33,14 +34,24 @@ export class LevelSelectScene extends Phaser.Scene {
       const progress = SaveManager.getLevelProgress(level.id);
 
       const label = unlocked ? `Fase ${level.id}: ${level.nome}` : `Fase ${level.id}: bloqueada`;
-      const button = new Button(this, centerX, y, label, () => goToScene(this, SCENES.GAME, { levelId: level.id }), { width: 460 });
+      const button = new Button(
+        this,
+        centerX,
+        y,
+        label,
+        () => goToScene(this, SCENES.GAME, { levelId: level.id } satisfies GameSceneData),
+        { width: 460 },
+      );
       button.setEnabled(unlocked);
 
       // Linha de informação abaixo do botão
       let info = `Tempo: ${formatTime(level.tempoLimite)}  ·  Ainda não concluída`;
       if (!unlocked) info = `Conclua a fase ${level.id - 1} para liberar`;
-      else if (progress) info = `${starsText(progress.bestStars)}  ·  Melhor tempo: ${formatTime(progress.bestTime)}  ·  Recorde: ${progress.bestScore} pts`;
-      this.add.text(centerX, y + 40, info, textStyle(16, unlocked ? theme.text.muted : theme.text.disabled)).setOrigin(0.5);
+      else if (progress)
+        info = `${starsText(progress.bestStars)}  ·  Melhor tempo: ${formatTime(progress.bestTime)}  ·  Recorde: ${progress.bestScore} pts`;
+      this.add
+        .text(centerX, y + 40, info, textStyle(16, unlocked ? theme.text.muted : theme.text.disabled))
+        .setOrigin(0.5);
 
       return button;
     });

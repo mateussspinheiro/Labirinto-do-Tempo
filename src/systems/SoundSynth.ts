@@ -38,9 +38,26 @@ interface Voice {
 
 /** Frequências (Hz) das notas musicais usadas. O número é a oitava. */
 const N = {
-  G2: 98.0, A2: 110.0, C3: 130.81, F2: 87.31, E3: 164.81, F3: 174.61, G3: 196.0, A3: 220.0,
-  C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.0, A4: 440.0,
-  C5: 523.25, E5: 659.25, G5: 783.99, A5: 880.0, C6: 1046.5, E6: 1318.5,
+  G2: 98.0,
+  A2: 110.0,
+  C3: 130.81,
+  F2: 87.31,
+  E3: 164.81,
+  F3: 174.61,
+  G3: 196.0,
+  A3: 220.0,
+  C4: 261.63,
+  D4: 293.66,
+  E4: 329.63,
+  F4: 349.23,
+  G4: 392.0,
+  A4: 440.0,
+  C5: 523.25,
+  E5: 659.25,
+  G5: 783.99,
+  A5: 880.0,
+  C6: 1046.5,
+  E6: 1318.5,
 };
 
 /** Taxa de amostragem: quantas amostras por segundo. */
@@ -73,7 +90,16 @@ const MENU_MUSIC: Voice[] = [
     ],
   },
   // Baixo: uma nota longa por compasso
-  { wave: 'sine', volume: 0.3, notes: [[N.C3, MENU_BAR], [N.A2, MENU_BAR], [N.F2, MENU_BAR], [N.G2, MENU_BAR]] },
+  {
+    wave: 'sine',
+    volume: 0.3,
+    notes: [
+      [N.C3, MENU_BAR],
+      [N.A2, MENU_BAR],
+      [N.F2, MENU_BAR],
+      [N.G2, MENU_BAR],
+    ],
+  },
 ];
 
 // Música da partida: mais rápida e com mais tensão (Lá menor, Fá, Dó, Sol).
@@ -107,15 +133,70 @@ const RECIPES: Record<string, Voice[]> = {
   [SOUNDS.MUSIC_MENU]: MENU_MUSIC,
   [SOUNDS.MUSIC_GAME]: GAME_MUSIC,
   // Cristal: duas notas agudas subindo ("plim!")
-  [SOUNDS.CRYSTAL]: [{ wave: 'sine', volume: 0.5, notes: [[N.A5, 0.07], [N.E6, 0.14]] }],
+  [SOUNDS.CRYSTAL]: [
+    {
+      wave: 'sine',
+      volume: 0.5,
+      notes: [
+        [N.A5, 0.07],
+        [N.E6, 0.14],
+      ],
+    },
+  ],
   // Portal liberado: arpejo subindo
-  [SOUNDS.PORTAL]: [{ wave: 'triangle', volume: 0.5, notes: [[N.C5, 0.09], [N.E5, 0.09], [N.G5, 0.09], [N.C6, 0.3]] }],
+  [SOUNDS.PORTAL]: [
+    {
+      wave: 'triangle',
+      volume: 0.5,
+      notes: [
+        [N.C5, 0.09],
+        [N.E5, 0.09],
+        [N.G5, 0.09],
+        [N.C6, 0.3],
+      ],
+    },
+  ],
   // Dano: notas graves descendo, com onda quadrada ("áspera")
-  [SOUNDS.HIT]: [{ wave: 'square', volume: 0.3, notes: [[N.E3, 0.08], [N.C3, 0.08], [N.A2, 0.16]] }],
+  [SOUNDS.HIT]: [
+    {
+      wave: 'square',
+      volume: 0.3,
+      notes: [
+        [N.E3, 0.08],
+        [N.C3, 0.08],
+        [N.A2, 0.16],
+      ],
+    },
+  ],
   // Vitória: pequena fanfarra
-  [SOUNDS.VICTORY]: [{ wave: 'square', volume: 0.22, notes: [[N.C5, 0.12], [N.E5, 0.12], [N.G5, 0.12], [N.C6, 0.12], [0, 0.06], [N.G5, 0.1], [N.C6, 0.5]] }],
+  [SOUNDS.VICTORY]: [
+    {
+      wave: 'square',
+      volume: 0.22,
+      notes: [
+        [N.C5, 0.12],
+        [N.E5, 0.12],
+        [N.G5, 0.12],
+        [N.C6, 0.12],
+        [0, 0.06],
+        [N.G5, 0.1],
+        [N.C6, 0.5],
+      ],
+    },
+  ],
   // Derrota: notas descendo devagar
-  [SOUNDS.DEFEAT]: [{ wave: 'triangle', volume: 0.45, notes: [[N.G4, 0.25], [N.E4, 0.25], [N.C4, 0.25], [N.G3, 0.6]] }],
+  [SOUNDS.DEFEAT]: [
+    {
+      wave: 'triangle',
+      volume: 0.45,
+      notes: [
+        [N.G4, 0.25],
+        [N.E4, 0.25],
+        [N.C4, 0.25],
+        [N.G3, 0.6],
+      ],
+    },
+  ],
   // Clique dos botões: um "tic" curtinho
   [SOUNDS.CLICK]: [{ wave: 'square', volume: 0.15, notes: [[N.A4, 0.035]] }],
 };

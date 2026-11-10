@@ -14,7 +14,9 @@ export class WelcomeScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 80, GAME_TITLE, textStyle(52, theme.text.title, true)).setOrigin(0.5);
+    this.add
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 80, GAME_TITLE, textStyle(52, theme.text.title, true))
+      .setOrigin(0.5);
 
     // Decoração: Lucas andando em direção ao portal, com cristais no caminho
     const y = GAME_HEIGHT / 2 + 10;
@@ -22,9 +24,21 @@ export class WelcomeScene extends Phaser.Scene {
     this.tweens.add({ targets: portal, angle: 360, duration: 3000, repeat: -1 });
     [-60, 0, 60].forEach((dx, i) => {
       const crystal = this.add.image(GAME_WIDTH / 2 + dx, y, TEXTURES.CRYSTAL);
-      this.tweens.add({ targets: crystal, y: y - 5, duration: 600, delay: i * 150, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+      this.tweens.add({
+        targets: crystal,
+        y: y - 5,
+        duration: 600,
+        delay: i * 150,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
     });
-    this.add.sprite(GAME_WIDTH / 2 - 150, y, TEXTURES.PLAYER, ANIMS.PLAYER_SIDE.idle).setScale(1.5).setFlipX(true).play(ANIMS.PLAYER_SIDE.key);
+    this.add
+      .sprite(GAME_WIDTH / 2 - 150, y, TEXTURES.PLAYER, ANIMS.PLAYER_SIDE.idle)
+      .setScale(1.5)
+      .setFlipX(true)
+      .play(ANIMS.PLAYER_SIDE.key);
 
     const hint = this.add
       .text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 90, 'Clique ou pressione Enter para começar', textStyle(22))

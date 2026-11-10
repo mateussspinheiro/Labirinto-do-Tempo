@@ -30,7 +30,14 @@ export class Slider extends Phaser.GameObjects.Container implements Focusable {
    * @param value    valor inicial (0 a 1)
    * @param onChange chamada quando o jogador muda o valor
    */
-  constructor(scene: Phaser.Scene, x: number, y: number, label: string, value: number, onChange: (value: number) => void) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    label: string,
+    value: number,
+    onChange: (value: number) => void,
+  ) {
     super(scene, x, y);
     this.value = value;
     this.onChange = onChange;
@@ -38,16 +45,29 @@ export class Slider extends Phaser.GameObjects.Container implements Focusable {
     const half = SLIDER.width / 2;
 
     // Rótulo à esquerda e porcentagem à direita, acima da barra
-    this.labelText = scene.add.text(-half, -24, label, textStyle(SLIDER.fontSize, theme.text.normal, true)).setOrigin(0, 0.5);
-    this.valueText = scene.add.text(half, -24, '', textStyle(SLIDER.fontSize, theme.text.normal, true)).setOrigin(1, 0.5);
+    this.labelText = scene.add
+      .text(-half, -24, label, textStyle(SLIDER.fontSize, theme.text.normal, true))
+      .setOrigin(0, 0.5);
+    this.valueText = scene.add
+      .text(half, -24, '', textStyle(SLIDER.fontSize, theme.text.normal, true))
+      .setOrigin(1, 0.5);
 
     // Barra de fundo, preenchimento (parte "cheia") e bolinha
-    const track = scene.add.rectangle(0, 0, SLIDER.width, SLIDER.trackHeight, theme.colors.buttonIdle).setStrokeStyle(1, theme.colors.buttonBorder);
+    const track = scene.add
+      .rectangle(0, 0, SLIDER.width, SLIDER.trackHeight, theme.colors.buttonIdle)
+      .setStrokeStyle(1, theme.colors.buttonBorder);
     this.fill = scene.add.rectangle(-half, 0, 0, SLIDER.trackHeight, theme.colors.primary).setOrigin(0, 0.5);
     this.handle = scene.add.circle(0, 0, SLIDER.handleRadius, theme.colors.accent);
 
     // Área invisível maior que a barra, para facilitar o clique
-    const hitArea = scene.add.rectangle(0, 0, SLIDER.width + SLIDER.handleRadius * 2, SLIDER.handleRadius * 3, 0x000000, 0);
+    const hitArea = scene.add.rectangle(
+      0,
+      0,
+      SLIDER.width + SLIDER.handleRadius * 2,
+      SLIDER.handleRadius * 3,
+      0x000000,
+      0,
+    );
 
     this.add([this.labelText, this.valueText, track, this.fill, this.handle, hitArea]);
     scene.add.existing(this);
@@ -66,10 +86,6 @@ export class Slider extends Phaser.GameObjects.Container implements Focusable {
     scene.input.on('pointerup', () => (this.dragging = false));
 
     this.redraw();
-  }
-
-  getValue(): number {
-    return this.value;
   }
 
   /** Muda o valor (0 a 1). Se notify = true, avisa o onChange. */

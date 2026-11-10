@@ -42,7 +42,14 @@ export class Button extends Phaser.GameObjects.Container implements Focusable {
   /** Chamado quando o mouse passa por cima (o ButtonGroup usa para mover o foco). */
   public onHover?: () => void;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, text: string, onClick: () => void, options: ButtonOptions = {}) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    text: string,
+    onClick: () => void,
+    options: ButtonOptions = {},
+  ) {
     super(scene, x, y);
     this.onClick = onClick;
 
@@ -54,7 +61,9 @@ export class Button extends Phaser.GameObjects.Container implements Focusable {
       .rectangle(0, 0, width, height, theme.colors.buttonIdle)
       .setStrokeStyle(2, theme.colors.buttonBorder);
 
-    this.label = scene.add.text(0, 0, text, textStyle(options.fontSize ?? BUTTON.fontSize, theme.text.normal, true)).setOrigin(0.5);
+    this.label = scene.add
+      .text(0, 0, text, textStyle(options.fontSize ?? BUTTON.fontSize, theme.text.normal, true))
+      .setOrigin(0.5);
 
     this.add([this.background, this.label]);
     scene.add.existing(this);
@@ -107,7 +116,10 @@ export class Button extends Phaser.GameObjects.Container implements Focusable {
       return;
     }
     this.background.setFillStyle(this.focused ? theme.colors.buttonFocus : theme.colors.buttonIdle);
-    this.background.setStrokeStyle(this.focused ? 3 : 2, this.focused ? theme.colors.accent : theme.colors.buttonBorder);
+    this.background.setStrokeStyle(
+      this.focused ? 3 : 2,
+      this.focused ? theme.colors.accent : theme.colors.buttonBorder,
+    );
     this.label.setColor(this.focused ? theme.text.title : theme.text.normal);
     this.setScale(this.focused ? 1.05 : 1);
   }

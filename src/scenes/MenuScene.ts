@@ -30,7 +30,10 @@ export class MenuScene extends Phaser.Scene {
 
     const firstY = 220;
     const buttons = options.map(
-      (option, i) => new Button(this, GAME_WIDTH / 2, firstY + i * BUTTON.spacing, option.label, () => goToScene(this, option.scene)),
+      (option, i) =>
+        new Button(this, GAME_WIDTH / 2, firstY + i * BUTTON.spacing, option.label, () =>
+          goToScene(this, option.scene),
+        ),
     );
 
     new ButtonGroup(this, buttons);

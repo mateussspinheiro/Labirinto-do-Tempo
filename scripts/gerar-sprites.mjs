@@ -162,18 +162,22 @@ function fromText(rows) {
   if (rows.length !== SIZE || rows.some((row) => row.length !== SIZE)) {
     throw new Error('Desenho precisa ter 16 linhas de 16 caracteres:\n' + rows.join('\n'));
   }
-  return rows.map((row) => [...row].map((ch) => {
-    if (!(ch in PALETTE)) throw new Error(`Letra sem cor na paleta: "${ch}"`);
-    return PALETTE[ch] ? hex(PALETTE[ch]) : null;
-  }));
+  return rows.map((row) =>
+    [...row].map((ch) => {
+      if (!(ch in PALETTE)) throw new Error(`Letra sem cor na paleta: "${ch}"`);
+      return PALETTE[ch] ? hex(PALETTE[ch]) : null;
+    }),
+  );
 }
 
 /** Cria uma grade calculando a cor de cada pixel com uma função (x, y) → cor. */
 function fromFunction(fn) {
-  return Array.from({ length: SIZE }, (_, y) => Array.from({ length: SIZE }, (_, x) => {
-    const color = fn(x, y);
-    return color ? hex(color) : null;
-  }));
+  return Array.from({ length: SIZE }, (_, y) =>
+    Array.from({ length: SIZE }, (_, x) => {
+      const color = fn(x, y);
+      return color ? hex(color) : null;
+    }),
+  );
 }
 
 /** Pinta de escuro os pixels transparentes vizinhos do desenho (contorno). */
@@ -294,7 +298,11 @@ mkdirSync(OUT_DIR, { recursive: true });
 
 // Jogador: 9 quadros → [baixo ×3, cima ×3, lado ×3]
 const playerFrames = [];
-for (const [dir, legs] of [['down', 'front'], ['up', 'front'], ['side', 'side']]) {
+for (const [dir, legs] of [
+  ['down', 'front'],
+  ['up', 'front'],
+  ['side', 'side'],
+]) {
   for (const legRows of PLAYER_LEGS[legs]) {
     playerFrames.push(outline(fromText([...PLAYER_TOP[dir], ...legRows])));
   }
@@ -312,4 +320,8 @@ savePng('wall-hc.png', wall('#e0e0e0', '#ffffff', '#757575'));
 savePng('floor-hc.png', floor('#000000', '#1a1a1a'));
 // Partícula: quadradinho branco 3×3 (o jogo pinta com a cor desejada)
 const white = hex('#ffffff');
-savePng('particle.png', [[white, white, white], [white, white, white], [white, white, white]]);
+savePng('particle.png', [
+  [white, white, white],
+  [white, white, white],
+  [white, white, white],
+]);

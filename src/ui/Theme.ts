@@ -63,7 +63,11 @@ function applyAccessibility(highContrast: boolean, largeText: boolean): void {
  * @param color cor no formato CSS ('#ffffff')
  * @param bold  se o texto fica em negrito
  */
-export function textStyle(size: number, color: string = theme.text.normal, bold = false): Phaser.Types.GameObjects.Text.TextStyle {
+export function textStyle(
+  size: number,
+  color: string = theme.text.normal,
+  bold = false,
+): Phaser.Types.GameObjects.Text.TextStyle {
   const finalSize = Math.round(size * (theme.largeText ? LARGE_TEXT_SCALE : 1));
   return {
     fontFamily: FONT_FAMILY,

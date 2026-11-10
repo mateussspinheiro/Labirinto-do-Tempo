@@ -57,7 +57,9 @@ export class SettingsScene extends Phaser.Scene {
       audio.setMasterVolume(value);
       this.previewSound();
     });
-    const musicSlider = new Slider(this, LEFT_X, 260, 'Música', settings.volumeMusica, (value) => audio.setMusicVolume(value));
+    const musicSlider = new Slider(this, LEFT_X, 260, 'Música', settings.volumeMusica, (value) =>
+      audio.setMusicVolume(value),
+    );
     const sfxSlider = new Slider(this, LEFT_X, 330, 'Efeitos', settings.volumeEfeitos, (value) => {
       audio.setSfxVolume(value);
       this.previewSound();
@@ -65,36 +67,74 @@ export class SettingsScene extends Phaser.Scene {
 
     // Botão de mudo: o texto mostra o estado atual
     const muteLabel = () => (audio.getSettings().mudo ? 'Som: desligado' : 'Som: ligado');
-    const muteButton = new Button(this, LEFT_X, 400, muteLabel(), () => {
-      audio.toggleMute();
-      muteButton.setText(muteLabel());
-    }, { width: COLUMN_BUTTON_WIDTH });
+    const muteButton = new Button(
+      this,
+      LEFT_X,
+      400,
+      muteLabel(),
+      () => {
+        audio.toggleMute();
+        muteButton.setText(muteLabel());
+      },
+      { width: COLUMN_BUTTON_WIDTH },
+    );
 
     // ============ Coluna da direita: ACESSIBILIDADE e PROGRESSO ============
     this.add.text(RIGHT_X, 120, 'Acessibilidade', textStyle(24, theme.text.muted, true)).setOrigin(0.5);
 
     const onOff = (value: boolean) => (value ? 'sim' : 'não');
     // Ao mudar a aparência, a tela é reaberta para já mostrar o novo visual
-    const contrastButton = new Button(this, RIGHT_X, 180, `Alto contraste: ${onOff(theme.highContrast)}`, () => {
-      setHighContrast(!theme.highContrast);
-      this.scene.restart({ focusIndex: 4 });
-    }, { width: COLUMN_BUTTON_WIDTH });
-    const largeTextButton = new Button(this, RIGHT_X, 246, `Texto maior: ${onOff(theme.largeText)}`, () => {
-      setLargeText(!theme.largeText);
-      this.scene.restart({ focusIndex: 5 });
-    }, { width: COLUMN_BUTTON_WIDTH });
+    const contrastButton = new Button(
+      this,
+      RIGHT_X,
+      180,
+      `Alto contraste: ${onOff(theme.highContrast)}`,
+      () => {
+        setHighContrast(!theme.highContrast);
+        this.scene.restart({ focusIndex: 4 });
+      },
+      { width: COLUMN_BUTTON_WIDTH },
+    );
+    const largeTextButton = new Button(
+      this,
+      RIGHT_X,
+      246,
+      `Texto maior: ${onOff(theme.largeText)}`,
+      () => {
+        setLargeText(!theme.largeText);
+        this.scene.restart({ focusIndex: 5 });
+      },
+      { width: COLUMN_BUTTON_WIDTH },
+    );
 
     this.add.text(RIGHT_X, 330, 'Progresso', textStyle(24, theme.text.muted, true)).setOrigin(0.5);
-    const clearButton = new Button(this, RIGHT_X, 400, 'Apagar progresso', () =>
-      showConfirmDialog(this, 'Apagar todo o progresso?\nFases concluídas e recordes serão perdidos.', 'Sim, apagar', group, () => {
-        SaveManager.clearProgress();
-        this.showToast('Progresso apagado.');
-      }),
-    { width: COLUMN_BUTTON_WIDTH });
+    const clearButton = new Button(
+      this,
+      RIGHT_X,
+      400,
+      'Apagar progresso',
+      () =>
+        showConfirmDialog(
+          this,
+          'Apagar todo o progresso?\nFases concluídas e recordes serão perdidos.',
+          'Sim, apagar',
+          group,
+          () => {
+            SaveManager.clearProgress();
+            this.showToast('Progresso apagado.');
+          },
+        ),
+      { width: COLUMN_BUTTON_WIDTH },
+    );
 
     // Dica dos atalhos de volume
     this.add
-      .text(GAME_WIDTH / 2, 470, 'Durante a partida: + / - mudam o volume geral · M liga/desliga o som', textStyle(16, theme.text.muted))
+      .text(
+        GAME_WIDTH / 2,
+        470,
+        'Durante a partida: + / - mudam o volume geral · M liga/desliga o som',
+        textStyle(16, theme.text.muted),
+      )
       .setOrigin(0.5);
 
     // Ordem da navegação pelo teclado (os índices 4 e 5 são usados no restart acima)
