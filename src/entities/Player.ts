@@ -2,9 +2,10 @@
 // Player.ts — o jogador (Lucas).
 // Usa a física arcade: definimos a velocidade e o Phaser move o
 // sprite e impede que ele atravesse as paredes (collider na GameScene).
+// A animação de andar muda conforme a direção (frente, costas, lado).
 // =============================================================
 import Phaser from 'phaser';
-import { OBSTACLE, PLAYER, TEXTURES, TILE_SIZE } from '../config/constants';
+import { ANIMS, OBSTACLE, PLAYER, TEXTURES, TILE_SIZE } from '../config/constants';
 import type { Point } from '../types';
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
@@ -13,9 +14,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   /** Canto do labirinto na tela, usado para saber onde fica o centro dos corredores. */
   private mazeOffset: Point;
   private invulnerable = false;
+  /** Última animação usada: define o quadro "parado" quando o jogador para. */
+  private facing: (typeof ANIMS)['PLAYER_DOWN' | 'PLAYER_UP' | 'PLAYER_SIDE'] = ANIMS.PLAYER_DOWN;
 
   constructor(scene: Phaser.Scene, x: number, y: number, mazeOffset: Point) {
-    super(scene, x, y, TEXTURES.PLAYER);
+    super(scene, x, y, TEXTURES.PLAYER, ANIMS.PLAYER_DOWN.idle);
     this.mazeOffset = mazeOffset;
 
     // Adiciona à cena (desenho) e à física (corpo de colisão)
@@ -54,6 +57,28 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (dy !== 0 && dx === 0) vx = this.pullToLane(this.x, this.mazeOffset.x);
 
     this.setVelocity(vx, vy);
+    this.updateAnimation(dx, dy);
+  }
+
+  /**
+   * Escolhe a animação pela direção das teclas:
+   * horizontal → de lado (espelhado para a direita), cima → costas, baixo → frente.
+   * Sem tecla nenhuma, para a animação no quadro "parado".
+   */
+  private updateAnimation(dx: number, dy: number): void {
+    if (dx === 0 && dy === 0) {
+      this.anims.stop();
+      this.setFrame(this.facing.idle);
+      return;
+    }
+    if (dx !== 0) {
+      this.facing = ANIMS.PLAYER_SIDE;
+      this.setFlipX(dx > 0); // o desenho olha para a esquerda; espelha para a direita
+    } else {
+      this.facing = dy < 0 ? ANIMS.PLAYER_UP : ANIMS.PLAYER_DOWN;
+      this.setFlipX(false);
+    }
+    this.anims.play(this.facing.key, true); // true = não reinicia se já estiver tocando
   }
 
   /** Se está invencível (logo depois de levar dano). */
@@ -84,6 +109,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   /** Para o jogador (usado ao terminar a fase). Não usamos o nome "stop" porque o Sprite já tem um. */
   halt(): void {
     this.setVelocity(0, 0);
+    this.anims.stop();
   }
 
   /** Velocidade que leva a coordenada até o centro do tile mais próximo. */

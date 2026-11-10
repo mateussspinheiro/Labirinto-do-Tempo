@@ -10,6 +10,7 @@ import { SCENES, GAME_WIDTH, GAME_HEIGHT, BUTTON } from '../config/constants';
 import { Button, ButtonGroup } from '../ui/Button';
 import { textStyle, theme } from '../ui/Theme';
 import type { HowToPlayData } from './HowToPlayScene';
+import { goToScene } from '../ui/Transition';
 
 /** Dados recebidos da GameScene. */
 export interface PauseSceneData {
@@ -60,8 +61,8 @@ export class PauseScene extends Phaser.Scene {
 
   /** Recomeça a mesma fase do zero. */
   private restartLevel(): void {
-    // start() fecha esta cena e reinicia a GameScene (que reabre o HUD)
-    this.scene.start(SCENES.GAME, { levelId: this.levelId });
+    // Iniciar a GameScene de novo fecha esta cena e reinicia a partida (que reabre o HUD)
+    goToScene(this, SCENES.GAME, { levelId: this.levelId });
   }
 
   /** Abre "Como Jogar" por cima; ao voltar, a pausa reaparece. */
@@ -72,7 +73,7 @@ export class PauseScene extends Phaser.Scene {
   }
 
   private goToMenu(): void {
-    this.scene.stop(SCENES.GAME); // fechar a partida também fecha o HUD
-    this.scene.start(SCENES.MENU);
+    // Fechar a partida também fecha o HUD
+    goToScene(this, SCENES.MENU, undefined, () => this.scene.stop(SCENES.GAME));
   }
 }

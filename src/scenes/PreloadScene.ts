@@ -1,13 +1,18 @@
 // =============================================================
 // PreloadScene — carrega os assets (imagens e sons) e mostra
 // uma barra de carregamento enquanto isso acontece.
-// Por enquanto as imagens são formas desenhadas pelo próprio código
-// (texturas geradas), então não dependemos de arquivos externos.
+//
+// Imagens: pixel art em public/assets/images, gerada pelo script
+//          scripts/gerar-sprites.mjs (npm run sprites).
+// Sons:    gerados pelo código (SoundSynth), sem arquivos.
 // =============================================================
 import Phaser from 'phaser';
-import { SCENES, GAME_WIDTH, GAME_HEIGHT, MAZE_COLORS, TEXTURES, TILE_SIZE } from '../config/constants';
+import { SCENES, ANIMS, FRAME_SIZE, GAME_WIDTH, GAME_HEIGHT, TEXTURES } from '../config/constants';
 import { SoundSynth } from '../systems/SoundSynth';
 import { textStyle, theme } from '../ui/Theme';
+
+/** Pasta das imagens (relativa a public/). */
+const IMAGES = 'assets/images/';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -16,6 +21,21 @@ export class PreloadScene extends Phaser.Scene {
 
   preload(): void {
     this.createLoadingBar();
+
+    // ---- IMAGENS ----
+    // Imagens simples (um quadro só)
+    this.load.image(TEXTURES.WALL, IMAGES + 'wall.png');
+    this.load.image(TEXTURES.FLOOR, IMAGES + 'floor.png');
+    this.load.image(TEXTURES.WALL_HC, IMAGES + 'wall-hc.png');
+    this.load.image(TEXTURES.FLOOR_HC, IMAGES + 'floor-hc.png');
+    this.load.image(TEXTURES.CRYSTAL, IMAGES + 'crystal.png');
+    this.load.image(TEXTURES.PORTAL_LOCKED, IMAGES + 'portal-locked.png');
+    this.load.image(TEXTURES.PORTAL_OPEN, IMAGES + 'portal-open.png');
+    this.load.image(TEXTURES.PARTICLE, IMAGES + 'particle.png');
+    // Spritesheets: uma imagem com vários quadros lado a lado (para animar)
+    const frameConfig = { frameWidth: FRAME_SIZE, frameHeight: FRAME_SIZE };
+    this.load.spritesheet(TEXTURES.PLAYER, IMAGES + 'player.png', frameConfig);
+    this.load.spritesheet(TEXTURES.ENEMY, IMAGES + 'enemy.png', frameConfig);
 
     // ---- ÁUDIO ----
     // Os sons são gerados pelo código (SoundSynth). Para usar arquivos
@@ -33,7 +53,7 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.generateTextures();
+    this.createAnimations();
     // Gera só os sons que não vieram de arquivo
     SoundSynth.generateMissingSounds(this.game);
     this.scene.start(SCENES.WELCOME);
@@ -59,62 +79,23 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   /**
-   * Gera texturas simples desenhando com Graphics e salvando como imagem.
-   * Depois cada objeto do jogo usa a textura pelo nome (TEXTURES.*).
+   * Cria as animações (uma vez só; ficam disponíveis para todas as cenas).
+   * Uma animação é uma lista de quadros da spritesheet tocada em sequência.
    */
-  private generateTextures(): void {
-    const g = this.make.graphics({}, false); // "pincel" que não aparece na tela
-
-    // Parede: quadrado com borda escura (versão normal e de alto contraste)
-    const drawWall = (key: string, border: number, fill: number) => {
-      g.fillStyle(border).fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-      g.fillStyle(fill).fillRect(2, 2, TILE_SIZE - 4, TILE_SIZE - 4);
-      g.generateTexture(key, TILE_SIZE, TILE_SIZE);
-      g.clear();
-    };
-    drawWall(TEXTURES.WALL, MAZE_COLORS.wallBorder, MAZE_COLORS.wall);
-    drawWall(TEXTURES.WALL_HC, MAZE_COLORS.wallBorderHighContrast, MAZE_COLORS.wallHighContrast);
-
-    // Chão: quadrado escuro com uma linha sutil (normal e alto contraste)
-    const drawFloor = (key: string, line: number, fill: number) => {
-      g.fillStyle(line).fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-      g.fillStyle(fill).fillRect(1, 1, TILE_SIZE - 1, TILE_SIZE - 1);
-      g.generateTexture(key, TILE_SIZE, TILE_SIZE);
-      g.clear();
-    };
-    drawFloor(TEXTURES.FLOOR, MAZE_COLORS.floorLine, MAZE_COLORS.floor);
-    drawFloor(TEXTURES.FLOOR_HC, MAZE_COLORS.floorLineHighContrast, MAZE_COLORS.floorHighContrast);
-
-    // Jogador: círculo verde
-    g.fillStyle(MAZE_COLORS.player).fillCircle(12, 12, 12);
-    g.generateTexture(TEXTURES.PLAYER, 24, 24);
-    g.clear();
-
-    // Cristal: losango azul-claro com um brilho
-    g.fillStyle(MAZE_COLORS.crystal).fillPoints(
-      [new Phaser.Math.Vector2(10, 0), new Phaser.Math.Vector2(20, 12), new Phaser.Math.Vector2(10, 24), new Phaser.Math.Vector2(0, 12)],
-      true,
-    );
-    g.fillStyle(MAZE_COLORS.crystalShine).fillRect(7, 6, 3, 6);
-    g.generateTexture(TEXTURES.CRYSTAL, 20, 24);
-    g.clear();
-
-    // Portal bloqueado: anel cinza
-    g.lineStyle(5, MAZE_COLORS.portalLocked).strokeCircle(14, 14, 11);
-    g.generateTexture(TEXTURES.PORTAL_LOCKED, 28, 28);
-    g.clear();
-
-    // Portal liberado: anel roxo com núcleo dourado
-    g.fillStyle(MAZE_COLORS.portalCore).fillCircle(14, 14, 6);
-    g.lineStyle(5, MAZE_COLORS.portalOpen).strokeCircle(14, 14, 11);
-    g.generateTexture(TEXTURES.PORTAL_OPEN, 28, 28);
-    g.clear();
-
-    // Inimigo: bolinha vermelha com dois olhos
-    g.fillStyle(MAZE_COLORS.enemy).fillCircle(12, 12, 12);
-    g.fillStyle(MAZE_COLORS.enemyEye).fillCircle(8, 10, 3).fillCircle(16, 10, 3);
-    g.generateTexture(TEXTURES.ENEMY, 24, 24);
-
-    g.destroy();
+  private createAnimations(): void {
+    for (const anim of [ANIMS.PLAYER_DOWN, ANIMS.PLAYER_UP, ANIMS.PLAYER_SIDE]) {
+      this.anims.create({
+        key: anim.key,
+        frames: this.anims.generateFrameNumbers(TEXTURES.PLAYER, { frames: [...anim.frames] }),
+        frameRate: ANIMS.playerFrameRate,
+        repeat: -1, // repete para sempre
+      });
+    }
+    this.anims.create({
+      key: ANIMS.ENEMY.key,
+      frames: this.anims.generateFrameNumbers(TEXTURES.ENEMY, { frames: [...ANIMS.ENEMY.frames] }),
+      frameRate: ANIMS.enemyFrameRate,
+      repeat: -1,
+    });
   }
 }

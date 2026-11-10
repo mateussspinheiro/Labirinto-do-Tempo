@@ -12,6 +12,7 @@ import { SaveManager } from '../systems/SaveManager';
 import { Button, ButtonGroup } from '../ui/Button';
 import { addScreenFrame } from '../ui/ScreenFrame';
 import { formatTime, starsText, textStyle, theme } from '../ui/Theme';
+import { goToScene } from '../ui/Transition';
 
 /** Distância vertical entre as fases na lista. */
 const ROW_HEIGHT = 110;
@@ -32,7 +33,7 @@ export class LevelSelectScene extends Phaser.Scene {
       const progress = SaveManager.getLevelProgress(level.id);
 
       const label = unlocked ? `Fase ${level.id}: ${level.nome}` : `Fase ${level.id}: bloqueada`;
-      const button = new Button(this, centerX, y, label, () => this.scene.start(SCENES.GAME, { levelId: level.id }), { width: 460 });
+      const button = new Button(this, centerX, y, label, () => goToScene(this, SCENES.GAME, { levelId: level.id }), { width: 460 });
       button.setEnabled(unlocked);
 
       // Linha de informação abaixo do botão

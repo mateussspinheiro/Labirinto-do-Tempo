@@ -6,6 +6,7 @@ import { SCENES, GAME_TITLE, GAME_WIDTH, BUTTON, SOUNDS } from '../config/consta
 import { AudioManager } from '../systems/AudioManager';
 import { Button, ButtonGroup } from '../ui/Button';
 import { textStyle, theme } from '../ui/Theme';
+import { goToScene } from '../ui/Transition';
 
 export class MenuScene extends Phaser.Scene {
   constructor() {
@@ -29,7 +30,7 @@ export class MenuScene extends Phaser.Scene {
 
     const firstY = 220;
     const buttons = options.map(
-      (option, i) => new Button(this, GAME_WIDTH / 2, firstY + i * BUTTON.spacing, option.label, () => this.scene.start(option.scene)),
+      (option, i) => new Button(this, GAME_WIDTH / 2, firstY + i * BUTTON.spacing, option.label, () => goToScene(this, option.scene)),
     );
 
     new ButtonGroup(this, buttons);

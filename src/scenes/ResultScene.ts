@@ -6,12 +6,13 @@
 // "Próxima fase", "Jogar de novo" e "Menu".
 // =============================================================
 import Phaser from 'phaser';
-import { SCENES, GAME_WIDTH, BUTTON, MAZE_COLORS } from '../config/constants';
+import { SCENES, GAME_WIDTH, BUTTON, EFFECT_COLORS } from '../config/constants';
 import { getLevel } from '../levels';
 import { SaveManager } from '../systems/SaveManager';
 import type { LevelResult } from '../types';
 import { Button, ButtonGroup } from '../ui/Button';
 import { formatTime, textStyle, theme } from '../ui/Theme';
+import { goToScene } from '../ui/Transition';
 
 const MAX_STARS = 3;
 
@@ -60,15 +61,15 @@ export class ResultScene extends Phaser.Scene {
     const buttonsY = 420;
 
     const nextButton = new Button(this, centerX, buttonsY, 'Próxima fase', () =>
-      this.scene.start(SCENES.GAME, { levelId: nextLevel!.id }),
+      goToScene(this, SCENES.GAME, { levelId: nextLevel!.id }),
     );
     // Só dá para avançar se existe uma próxima fase e ela está liberada
     nextButton.setEnabled(nextLevel !== undefined && SaveManager.isLevelUnlocked(nextLevel.id));
 
     const retryButton = new Button(this, centerX, buttonsY + BUTTON.spacing, 'Jogar de novo', () =>
-      this.scene.start(SCENES.GAME, { levelId: r.levelId }),
+      goToScene(this, SCENES.GAME, { levelId: r.levelId }),
     );
-    const menuButton = new Button(this, centerX, buttonsY + BUTTON.spacing * 2, 'Menu', () => this.scene.start(SCENES.MENU));
+    const menuButton = new Button(this, centerX, buttonsY + BUTTON.spacing * 2, 'Menu', () => goToScene(this, SCENES.MENU));
 
     // Na derrota, o foco começa em "Jogar de novo"
     new ButtonGroup(this, [nextButton, retryButton, menuButton], nextButton.isEnabled() ? 0 : 1);
@@ -80,7 +81,7 @@ export class ResultScene extends Phaser.Scene {
     for (let i = 0; i < MAX_STARS; i++) {
       const x = centerX + (i - 1) * spacing;
       const filled = i < earned;
-      const star = this.add.star(x, y, 5, 13, 30, filled ? MAZE_COLORS.star : MAZE_COLORS.starEmpty);
+      const star = this.add.star(x, y, 5, 13, 30, filled ? EFFECT_COLORS.star : EFFECT_COLORS.starEmpty);
 
       // As estrelas conquistadas "surgem" uma depois da outra
       if (filled) {

@@ -7,6 +7,7 @@ import Phaser from 'phaser';
 import { GAME_TITLE, GAME_WIDTH, GAME_HEIGHT, SCENES } from '../config/constants';
 import { Button } from './Button';
 import { textStyle, theme } from './Theme';
+import { goToScene } from './Transition';
 
 /** Posição vertical do botão de voltar (rodapé da tela). */
 const BACK_BUTTON_Y = GAME_HEIGHT - 50;
@@ -33,7 +34,7 @@ export function addScreenFrame(scene: Phaser.Scene, screenTitle: string, options
   scene.add.text(GAME_WIDTH / 2, 30, GAME_TITLE, textStyle(20, theme.text.muted, true)).setOrigin(0.5);
   scene.add.text(GAME_WIDTH / 2, 70, screenTitle, textStyle(36, theme.text.title, true)).setOrigin(0.5);
 
-  const goBack = options.onBack ?? (() => scene.scene.start(SCENES.MENU));
+  const goBack = options.onBack ?? (() => goToScene(scene, SCENES.MENU));
   scene.input.keyboard?.on('keydown-ESC', goBack);
 
   return new Button(scene, GAME_WIDTH / 2, BACK_BUTTON_Y, options.backLabel ?? 'Voltar ao menu', goBack);

@@ -4,7 +4,7 @@
 // Ao tocar no jogador, tira tempo (a regra fica na GameScene).
 // =============================================================
 import Phaser from 'phaser';
-import { OBSTACLE, TEXTURES } from '../config/constants';
+import { ANIMS, OBSTACLE, TEXTURES } from '../config/constants';
 import type { PatrolPath, Point } from '../types';
 
 /** Distância (px) em que consideramos que o inimigo chegou ao ponto. */
@@ -16,7 +16,7 @@ export class Obstacle extends Phaser.Physics.Arcade.Sprite {
   private speed: number;
 
   constructor(scene: Phaser.Scene, path: PatrolPath, speed: number) {
-    super(scene, path.a.x, path.a.y, TEXTURES.ENEMY);
+    super(scene, path.a.x, path.a.y, TEXTURES.ENEMY, 0);
     this.path = path;
     this.target = path.b;
     this.speed = speed;
@@ -25,6 +25,7 @@ export class Obstacle extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
     this.setSize(OBSTACLE.bodySize, OBSTACLE.bodySize);
     this.setImmovable(true); // o jogador não consegue empurrá-lo
+    this.anims.play(ANIMS.ENEMY.key); // "flutua" alternando 2 quadros
 
     this.moveToTarget();
   }

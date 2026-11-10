@@ -21,6 +21,7 @@ import type { LevelData, LevelResult } from '../types';
 import { textStyle, theme } from '../ui/Theme';
 import type { HudSceneData } from './HudScene';
 import type { PauseSceneData } from './PauseScene';
+import { fadeOut, goToScene } from '../ui/Transition';
 
 /** Dados recebidos ao iniciar a cena. */
 export interface GameSceneData {
@@ -222,6 +223,9 @@ export class GameScene extends Phaser.Scene {
     const color = victory ? theme.text.success : theme.text.danger;
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, text, textStyle(44, color, true)).setOrigin(0.5).setStroke('#000000', 6);
 
-    this.time.delayedCall(LEVEL_END_DELAY, () => this.scene.start(SCENES.RESULT, result));
+    this.time.delayedCall(LEVEL_END_DELAY, () => {
+      fadeOut(this.scene.get(SCENES.HUD)); // o HUD escurece junto com a partida
+      goToScene(this, SCENES.RESULT, result);
+    });
   }
 }

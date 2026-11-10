@@ -108,30 +108,18 @@ export const MAP_CHARS = {
   ENEMY: 'E',
 } as const;
 
-/** Cores do labirinto (usadas para gerar as texturas). */
-export const MAZE_COLORS = {
-  wall: 0x3f51b5,
-  wallBorder: 0x1a237e,
-  floor: 0x1b2040,
-  floorLine: 0x232a52,
-  // Versões de alto contraste do labirinto: paredes claras e chão preto
-  wallHighContrast: 0xe0e0e0,
-  wallBorderHighContrast: 0x757575,
-  floorHighContrast: 0x000000,
-  floorLineHighContrast: 0x1a1a1a,
-  player: 0x4caf50,
-  crystal: 0x4dd0e1,
-  crystalShine: 0xe0f7fa,
-  portalLocked: 0x616161,
-  portalOpen: 0xba68c8,
-  portalCore: 0xffd54f,
-  enemy: 0xe53935,
-  enemyEye: 0xffffff,
+/** Cores de efeitos visuais (as imagens em si estão em public/assets/images). */
+export const EFFECT_COLORS = {
   star: 0xffd54f,
   starEmpty: 0x3a3f5c,
+  crystalParticles: [0x4dd0e1, 0xe0f7fa, 0xffffff],
+  portalParticles: [0xba68c8, 0xffd54f, 0xffffff],
 };
 
-/** Chaves das texturas (imagens) usadas no jogo. */
+/**
+ * Chaves das texturas (imagens) usadas no jogo. Cada uma corresponde
+ * a um arquivo em public/assets/images (gerados por scripts/gerar-sprites.mjs).
+ */
 export const TEXTURES = {
   WALL: 'wall',
   FLOOR: 'floor',
@@ -142,7 +130,28 @@ export const TEXTURES = {
   PORTAL_LOCKED: 'portal-locked',
   PORTAL_OPEN: 'portal-open',
   ENEMY: 'enemy',
+  PARTICLE: 'particle',
 } as const;
+
+/** Tamanho de cada quadro das spritesheets (jogador e inimigo). */
+export const FRAME_SIZE = 32;
+
+/**
+ * Animações. Os números são os quadros da spritesheet do jogador:
+ * 0-2 = de frente (baixo), 3-5 = de costas (cima), 6-8 = de lado.
+ * Em cada direção: quadro 0 = parado, 1 e 2 = passos.
+ */
+export const ANIMS = {
+  PLAYER_DOWN: { key: 'player-down', frames: [1, 0, 2, 0], idle: 0 },
+  PLAYER_UP: { key: 'player-up', frames: [4, 3, 5, 3], idle: 3 },
+  PLAYER_SIDE: { key: 'player-side', frames: [7, 6, 8, 6], idle: 6 },
+  ENEMY: { key: 'enemy-float', frames: [0, 1] },
+  playerFrameRate: 8,
+  enemyFrameRate: 4,
+} as const;
+
+/** Duração (ms) do escurecimento (fade) nas trocas de tela. */
+export const FADE_MS = 250;
 
 /** Quantidade de cristais necessária para liberar o portal. */
 export const CRYSTALS_TO_UNLOCK = 3;

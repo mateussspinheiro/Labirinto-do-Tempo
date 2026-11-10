@@ -8,7 +8,7 @@
 // caso o botão de voltar retorna para a pausa, e não para o menu.
 // =============================================================
 import Phaser from 'phaser';
-import { SCENES, TEXTURES } from '../config/constants';
+import { SCENES, ANIMS, TEXTURES } from '../config/constants';
 import { ButtonGroup } from '../ui/Button';
 import { addScreenFrame } from '../ui/ScreenFrame';
 import { textStyle, theme } from '../ui/Theme';
@@ -53,7 +53,7 @@ export class HowToPlayScene extends Phaser.Scene {
       {
         title: 'Objetivo',
         text: 'Colete os 3 cristais e entre no portal antes do tempo acabar.',
-        drawIcon: (x, y) => this.add.image(x, y, TEXTURES.PORTAL_OPEN).setScale(1.6),
+        drawIcon: (x, y) => this.add.sprite(x, y, TEXTURES.PLAYER, 0).setScale(1.6).play(ANIMS.PLAYER_DOWN.key),
       },
       {
         title: 'Controles',
@@ -81,7 +81,8 @@ export class HowToPlayScene extends Phaser.Scene {
       {
         title: 'Obstáculos',
         text: 'Inimigos patrulham os corredores. Encostar em um tira 5 segundos.',
-        drawIcon: (x, y) => this.add.image(x, y, TEXTURES.ENEMY).setScale(1.6),
+        // Sprite animado (o mesmo "flutuar" do jogo)
+        drawIcon: (x, y) => this.add.sprite(x, y, TEXTURES.ENEMY, 0).setScale(1.6).play(ANIMS.ENEMY.key),
       },
     ];
 
