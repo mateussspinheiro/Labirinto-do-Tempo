@@ -2,12 +2,28 @@
 // Button.ts — botão reutilizável que funciona com mouse e teclado.
 //
 // - Button: um retângulo com texto. Clique do mouse aciona o botão.
-// - ButtonGroup: junta vários botões e deixa o jogador escolher com
-//   as setas (ou W/S) e confirmar com Enter ou Espaço.
+// - ButtonGroup: junta vários botões (ou sliders) e deixa o jogador
+//   escolher com as setas (ou W/S) e confirmar com Enter ou Espaço.
 // =============================================================
 import Phaser from 'phaser';
-import { BUTTON, COLORS, TEXT_COLORS } from '../config/constants';
+import { BUTTON, COLORS, SOUNDS, TEXT_COLORS } from '../config/constants';
+import { AudioManager } from '../systems/AudioManager';
 import { textStyle } from './Theme';
+
+/**
+ * Qualquer elemento que pode receber o foco do teclado (botão ou slider).
+ * É o "contrato" que o ButtonGroup usa para navegar entre eles.
+ */
+export interface Focusable {
+  setFocused(value: boolean): unknown;
+  isEnabled(): boolean;
+  /** Enter/Espaço/clique. */
+  press(): void;
+  /** Avisado quando o mouse passa por cima. */
+  onHover?: () => void;
+  /** Setas esquerda/direita (só sliders usam). */
+  adjust?(direction: number): void;
+}
 
 /** Opções de aparência do botão (todas opcionais). */
 export interface ButtonOptions {
@@ -16,7 +32,7 @@ export interface ButtonOptions {
   fontSize?: number;
 }
 
-export class Button extends Phaser.GameObjects.Container {
+export class Button extends Phaser.GameObjects.Container implements Focusable {
   private background: Phaser.GameObjects.Rectangle;
   private label: Phaser.GameObjects.Text;
   private onClick: () => void;
@@ -52,6 +68,7 @@ export class Button extends Phaser.GameObjects.Container {
   /** Aciona o botão (mesmo efeito do clique). */
   press(): void {
     if (!this.enabled) return;
+    AudioManager.get().playSfx(SOUNDS.CLICK);
     // Pequena "afundada" visual para dar feedback do clique
     this.scene.tweens.add({ targets: this, scale: 0.95, duration: 60, yoyo: true });
     this.onClick();
@@ -97,15 +114,16 @@ export class Button extends Phaser.GameObjects.Container {
 }
 
 /**
- * Agrupa botões para navegação pelo teclado.
- * Setas cima/baixo (ou W/S) e esquerda/direita (A/D) mudam a seleção;
+ * Agrupa botões (e sliders) para navegação pelo teclado.
+ * Setas cima/baixo (ou W/S) mudam a seleção; esquerda/direita (A/D)
+ * ajustam o slider selecionado ou, num botão, também mudam a seleção.
  * Enter ou Espaço confirmam.
  */
 export class ButtonGroup {
-  private buttons: Button[];
+  private buttons: Focusable[];
   private index = 0;
 
-  constructor(scene: Phaser.Scene, buttons: Button[], startIndex = 0) {
+  constructor(scene: Phaser.Scene, buttons: Focusable[], startIndex = 0) {
     this.buttons = buttons;
 
     // Quando o mouse passa em um botão, ele vira o selecionado
@@ -117,12 +135,12 @@ export class ButtonGroup {
     if (keyboard) {
       keyboard.on('keydown-UP', () => this.move(-1));
       keyboard.on('keydown-W', () => this.move(-1));
-      keyboard.on('keydown-LEFT', () => this.move(-1));
-      keyboard.on('keydown-A', () => this.move(-1));
+      keyboard.on('keydown-LEFT', () => this.sideways(-1));
+      keyboard.on('keydown-A', () => this.sideways(-1));
       keyboard.on('keydown-DOWN', () => this.move(1));
       keyboard.on('keydown-S', () => this.move(1));
-      keyboard.on('keydown-RIGHT', () => this.move(1));
-      keyboard.on('keydown-D', () => this.move(1));
+      keyboard.on('keydown-RIGHT', () => this.sideways(1));
+      keyboard.on('keydown-D', () => this.sideways(1));
       keyboard.on('keydown-ENTER', () => this.buttons[this.index]?.press());
       keyboard.on('keydown-SPACE', () => this.buttons[this.index]?.press());
     }
@@ -135,6 +153,13 @@ export class ButtonGroup {
     if (!this.buttons[i]?.isEnabled()) return;
     this.index = i;
     this.buttons.forEach((button, j) => button.setFocused(j === i));
+  }
+
+  /** Esquerda/direita: ajusta o slider selecionado ou muda de botão. */
+  private sideways(direction: number): void {
+    const current = this.buttons[this.index];
+    if (current?.adjust) current.adjust(direction);
+    else this.move(direction);
   }
 
   /** Move a seleção para o próximo botão habilitado (dá a volta no fim da lista). */

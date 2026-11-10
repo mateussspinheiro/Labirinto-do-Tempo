@@ -29,6 +29,14 @@ export interface PatrolPath {
   b: Point;
 }
 
+/** Configurações do jogador (salvas no localStorage). Volumes vão de 0 a 1. */
+export interface Settings {
+  volumeGeral: number;
+  volumeMusica: number;
+  volumeEfeitos: number;
+  mudo: boolean;
+}
+
 /** Resultado de uma partida, enviado para a ResultScene. */
 export interface LevelResult {
   levelId: number;

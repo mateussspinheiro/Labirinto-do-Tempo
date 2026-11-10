@@ -6,6 +6,7 @@
 // =============================================================
 import Phaser from 'phaser';
 import { SCENES, GAME_WIDTH, GAME_HEIGHT, COLORS, MAZE_COLORS, TEXTURES, TILE_SIZE } from '../config/constants';
+import { SoundSynth } from '../systems/SoundSynth';
 import { textStyle } from '../ui/Theme';
 
 export class PreloadScene extends Phaser.Scene {
@@ -16,11 +17,25 @@ export class PreloadScene extends Phaser.Scene {
   preload(): void {
     this.createLoadingBar();
 
-    // Aqui entram os this.load.image(...) / this.load.audio(...) do jogo.
+    // ---- ÁUDIO ----
+    // Os sons são gerados pelo código (SoundSynth). Para usar arquivos
+    // de verdade, coloque-os em public/assets/audio e descomente as
+    // linhas abaixo (a chave deve ser a mesma de SOUNDS):
+    //
+    // this.load.audio(SOUNDS.MUSIC_MENU, 'assets/audio/music-menu.ogg');
+    // this.load.audio(SOUNDS.MUSIC_GAME, 'assets/audio/music-game.ogg');
+    // this.load.audio(SOUNDS.CRYSTAL, 'assets/audio/crystal.ogg');
+    // this.load.audio(SOUNDS.PORTAL, 'assets/audio/portal.ogg');
+    // this.load.audio(SOUNDS.HIT, 'assets/audio/hit.ogg');
+    // this.load.audio(SOUNDS.VICTORY, 'assets/audio/victory.ogg');
+    // this.load.audio(SOUNDS.DEFEAT, 'assets/audio/defeat.ogg');
+    // this.load.audio(SOUNDS.CLICK, 'assets/audio/click.ogg');
   }
 
   create(): void {
     this.generateTextures();
+    // Gera só os sons que não vieram de arquivo
+    SoundSynth.generateMissingSounds(this.game);
     this.scene.start(SCENES.WELCOME);
   }
 

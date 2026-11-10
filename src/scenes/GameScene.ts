@@ -13,6 +13,7 @@ import {
   CRYSTALS_TO_UNLOCK,
   LEVEL_END_DELAY,
   OBSTACLE,
+  SOUNDS,
   GAME_WIDTH,
   GAME_HEIGHT,
   TEXT_COLORS,
@@ -22,6 +23,7 @@ import { Obstacle } from '../entities/Obstacle';
 import { Player } from '../entities/Player';
 import { Portal } from '../entities/Portal';
 import { getLevel } from '../levels';
+import { AudioManager } from '../systems/AudioManager';
 import { LevelLoader } from '../systems/LevelLoader';
 import { ScoreCalculator } from '../systems/ScoreCalculator';
 import type { LevelData, LevelResult } from '../types';
@@ -89,8 +91,38 @@ export class GameScene extends Phaser.Scene {
     //    (this.time) para sozinho quando a cena é pausada.
     this.time.addEvent({ delay: 1000, loop: true, callback: this.tick, callbackScope: this });
 
+    // 7) Música da partida e teclas de volume
+    AudioManager.get().playMusic(SOUNDS.MUSIC_GAME);
+    this.input.keyboard?.on('keydown', this.handleVolumeKeys, this);
+
     // Temporário: ESC volta para a seleção de fases
     this.input.keyboard?.on('keydown-ESC', () => this.scene.start(SCENES.LEVEL_SELECT));
+  }
+
+  /**
+   * Teclas de volume durante a partida:
+   *   + (ou =)  aumenta o volume geral em 10%
+   *   -         diminui o volume geral em 10%
+   *   M         liga/desliga o som
+   * Usamos event.key (o caractere digitado), que funciona em qualquer
+   * layout de teclado e também no teclado numérico.
+   */
+  private handleVolumeKeys(event: KeyboardEvent): void {
+    const audio = AudioManager.get();
+    switch (event.key) {
+      case '+':
+      case '=':
+        audio.stepMasterVolume(1);
+        break;
+      case '-':
+      case '_':
+        audio.stepMasterVolume(-1);
+        break;
+      case 'm':
+      case 'M':
+        audio.toggleMute();
+        break;
+    }
   }
 
   update(): void {
@@ -116,10 +148,12 @@ export class GameScene extends Phaser.Scene {
     if (this.finished || !crystal.collect()) return; // já tinha sido coletado
 
     this.crystalsCollected++;
+    AudioManager.get().playSfx(SOUNDS.CRYSTAL);
     this.game.events.emit(GAME_EVENTS.CRYSTAL_COLLECTED, this.crystalsCollected, CRYSTALS_TO_UNLOCK);
 
     if (this.crystalsCollected >= CRYSTALS_TO_UNLOCK) {
       this.portal.unlock();
+      AudioManager.get().playSfx(SOUNDS.PORTAL);
       this.game.events.emit(GAME_EVENTS.PORTAL_UNLOCKED);
     }
   }
@@ -130,6 +164,7 @@ export class GameScene extends Phaser.Scene {
 
     this.damageCount++;
     this.player.hurt();
+    AudioManager.get().playSfx(SOUNDS.HIT);
     this.cameras.main.shake(150, 0.008); // tremidinha na tela
     this.game.events.emit(GAME_EVENTS.PLAYER_HIT, OBSTACLE.damageSeconds);
     this.changeTime(-OBSTACLE.damageSeconds);
@@ -147,6 +182,11 @@ export class GameScene extends Phaser.Scene {
     this.finished = true;
     this.player.halt();
     this.physics.pause(); // congela inimigos e jogador
+
+    // Som: para a música e toca a vinheta de vitória ou derrota
+    const audio = AudioManager.get();
+    audio.stopMusic();
+    audio.playSfx(victory ? SOUNDS.VICTORY : SOUNDS.DEFEAT);
 
     const score = ScoreCalculator.calculate(victory, this.timeLeft, this.level.tempoLimite, this.damageCount);
     const result: LevelResult = {

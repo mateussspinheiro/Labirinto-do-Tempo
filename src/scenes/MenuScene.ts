@@ -2,7 +2,8 @@
 // MenuScene — menu principal com as 5 opções do jogo.
 // =============================================================
 import Phaser from 'phaser';
-import { SCENES, GAME_TITLE, GAME_WIDTH, BUTTON, TEXT_COLORS } from '../config/constants';
+import { SCENES, GAME_TITLE, GAME_WIDTH, BUTTON, SOUNDS, TEXT_COLORS } from '../config/constants';
+import { AudioManager } from '../systems/AudioManager';
 import { Button, ButtonGroup } from '../ui/Button';
 import { textStyle } from '../ui/Theme';
 
@@ -12,6 +13,9 @@ export class MenuScene extends Phaser.Scene {
   }
 
   create(): void {
+    // Música do menu (se já estiver tocando, continua de onde estava)
+    AudioManager.get().playMusic(SOUNDS.MUSIC_MENU);
+
     this.add.text(GAME_WIDTH / 2, 100, GAME_TITLE, textStyle(48, TEXT_COLORS.title, true)).setOrigin(0.5);
 
     // Lista de opções: texto do botão e cena que ele abre

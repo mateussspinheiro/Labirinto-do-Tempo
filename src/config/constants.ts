@@ -21,6 +21,7 @@ export const COLORS = {
   buttonFocus: 0x3949ab,
   buttonDisabled: 0x2a2d3e,
   buttonBorder: 0x7986cb,
+  danger: 0xef5350,
 };
 
 /** As mesmas cores em formato texto (CSS), usadas pelos objetos de texto. */
@@ -43,6 +44,14 @@ export const BUTTON = {
   height: 52,
   fontSize: 22,
   spacing: 66, // distância vertical entre botões empilhados
+};
+
+/** Tamanhos do controle deslizante (Slider). */
+export const SLIDER = {
+  width: 300,
+  trackHeight: 10,
+  handleRadius: 11,
+  fontSize: 20,
 };
 
 // ---------------- Labirinto ----------------
@@ -147,6 +156,42 @@ export const PLAYER = {
   bodySize: 22, // caixa de colisão menor que o tile, para passar nos corredores
   cornerAssist: 8, // força da "ajuda nas curvas" (alinha o jogador ao corredor)
 };
+
+// ---------------- Áudio ----------------
+
+/**
+ * Chaves (nomes) de todos os sons do jogo.
+ * Se existir um arquivo carregado com essa chave, ele é usado;
+ * senão o som é gerado pelo código (veja SoundSynth.ts).
+ */
+export const SOUNDS = {
+  MUSIC_MENU: 'music-menu',
+  MUSIC_GAME: 'music-game',
+  CRYSTAL: 'sfx-crystal',
+  PORTAL: 'sfx-portal',
+  HIT: 'sfx-hit',
+  VICTORY: 'sfx-victory',
+  DEFEAT: 'sfx-defeat',
+  CLICK: 'sfx-click',
+} as const;
+
+/** Valores do controle de volume. */
+export const AUDIO = {
+  defaultMaster: 0.8, // volume geral inicial (80%)
+  defaultMusic: 0.6,
+  defaultSfx: 0.8,
+  step: 0.1, // + / - mudam o volume em 10%
+};
+
+/** Evento emitido em this.game.events sempre que o volume ou o mudo mudam. */
+export const AUDIO_EVENTS = {
+  VOLUME_CHANGED: 'volume-changed', // (settings: Settings)
+} as const;
+
+/** Chaves usadas no localStorage do navegador. */
+export const STORAGE_KEYS = {
+  SETTINGS: 'labirinto-do-tempo:settings',
+} as const;
 
 /** Nomes (chaves) das cenas, para evitar erros de digitação. */
 export const SCENES = {
