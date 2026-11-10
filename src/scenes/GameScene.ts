@@ -7,17 +7,7 @@
 // Toda informação para o HUD sai daqui como EVENTO em this.game.events.
 // =============================================================
 import Phaser from 'phaser';
-import {
-  SCENES,
-  GAME_EVENTS,
-  CRYSTALS_TO_UNLOCK,
-  LEVEL_END_DELAY,
-  OBSTACLE,
-  SOUNDS,
-  GAME_WIDTH,
-  GAME_HEIGHT,
-  TEXT_COLORS,
-} from '../config/constants';
+import { SCENES, GAME_EVENTS, CRYSTALS_TO_UNLOCK, LEVEL_END_DELAY, OBSTACLE, SOUNDS, GAME_WIDTH, GAME_HEIGHT } from '../config/constants';
 import { Crystal } from '../entities/Crystal';
 import { Obstacle } from '../entities/Obstacle';
 import { Player } from '../entities/Player';
@@ -28,7 +18,7 @@ import { LevelLoader } from '../systems/LevelLoader';
 import { SaveManager } from '../systems/SaveManager';
 import { ScoreCalculator } from '../systems/ScoreCalculator';
 import type { LevelData, LevelResult } from '../types';
-import { textStyle } from '../ui/Theme';
+import { textStyle, theme } from '../ui/Theme';
 import type { HudSceneData } from './HudScene';
 import type { PauseSceneData } from './PauseScene';
 
@@ -83,7 +73,10 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, obstacles, () => this.hitPlayer());
 
     // 5) Abre o HUD em paralelo (launch não fecha esta cena)
-    const hudData: HudSceneData = { totalCrystals: CRYSTALS_TO_UNLOCK, timeLimit: this.level.tempoLimite };
+    // Primeira vez na fase 1? O HUD mostra a dica do objetivo.
+    const showTip = this.level.id === 1 && SaveManager.shouldShowTip();
+    if (showTip) SaveManager.markTipShown();
+    const hudData: HudSceneData = { totalCrystals: CRYSTALS_TO_UNLOCK, timeLimit: this.level.tempoLimite, showTip };
     this.scene.launch(SCENES.HUD, hudData);
 
 
@@ -226,7 +219,7 @@ export class GameScene extends Phaser.Scene {
 
     // Mensagem rápida antes de trocar de tela
     const text = victory ? 'Fase concluída!' : 'Tempo esgotado!';
-    const color = victory ? TEXT_COLORS.success : TEXT_COLORS.danger;
+    const color = victory ? theme.text.success : theme.text.danger;
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, text, textStyle(44, color, true)).setOrigin(0.5).setStroke('#000000', 6);
 
     this.time.delayedCall(LEVEL_END_DELAY, () => this.scene.start(SCENES.RESULT, result));

@@ -6,12 +6,12 @@
 // "Próxima fase", "Jogar de novo" e "Menu".
 // =============================================================
 import Phaser from 'phaser';
-import { SCENES, GAME_WIDTH, BUTTON, MAZE_COLORS, TEXT_COLORS } from '../config/constants';
+import { SCENES, GAME_WIDTH, BUTTON, MAZE_COLORS } from '../config/constants';
 import { getLevel } from '../levels';
 import { SaveManager } from '../systems/SaveManager';
 import type { LevelResult } from '../types';
 import { Button, ButtonGroup } from '../ui/Button';
-import { formatTime, textStyle } from '../ui/Theme';
+import { formatTime, textStyle, theme } from '../ui/Theme';
 
 const MAX_STARS = 3;
 
@@ -32,10 +32,10 @@ export class ResultScene extends Phaser.Scene {
 
     // ---- Título ----
     const title = r.victory ? 'Vitória!' : 'Derrota';
-    const titleColor = r.victory ? TEXT_COLORS.success : TEXT_COLORS.danger;
+    const titleColor = r.victory ? theme.text.success : theme.text.danger;
     this.add.text(centerX, 60, title, textStyle(52, titleColor, true)).setOrigin(0.5);
     const subtitle = r.victory ? `Você concluiu a fase ${r.levelId}!` : 'O tempo acabou. Tente de novo!';
-    this.add.text(centerX, 112, subtitle, textStyle(22, TEXT_COLORS.muted)).setOrigin(0.5);
+    this.add.text(centerX, 112, subtitle, textStyle(22, theme.text.muted)).setOrigin(0.5);
 
     // ---- Estrelas (desenhadas pelo código) ----
     this.drawStars(centerX, 175, r.stars);
@@ -51,7 +51,7 @@ export class ResultScene extends Phaser.Scene {
 
     // ---- Recorde ----
     if (r.newRecord) {
-      const record = this.add.text(centerX + 190, 175, 'Novo recorde!', textStyle(22, TEXT_COLORS.title, true)).setOrigin(0.5).setAngle(-8);
+      const record = this.add.text(centerX + 190, 175, 'Novo recorde!', textStyle(22, theme.text.title, true)).setOrigin(0.5).setAngle(-8);
       this.tweens.add({ targets: record, scale: 1.15, duration: 500, yoyo: true, repeat: -1 });
     }
 

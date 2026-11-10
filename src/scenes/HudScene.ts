@@ -8,18 +8,17 @@ import Phaser from 'phaser';
 import {
   SCENES,
   AUDIO_EVENTS,
-  COLORS,
+  FIRST_TIP,
   GAME_EVENTS,
   GAME_WIDTH,
   GAME_HEIGHT,
   HUD,
   HUD_HEIGHT,
-  TEXT_COLORS,
   TIME_WARNING_SECONDS,
 } from '../config/constants';
 import { AudioManager } from '../systems/AudioManager';
 import type { Settings } from '../types';
-import { formatTime, textStyle } from '../ui/Theme';
+import { formatTime, textStyle, theme } from '../ui/Theme';
 
 /** Posição do indicador de volume (canto direito do HUD). */
 const VOLUME_X = 680;
@@ -28,6 +27,8 @@ const VOLUME_X = 680;
 export interface HudSceneData {
   totalCrystals: number;
   timeLimit: number;
+  /** Mostrar a dica inicial do objetivo (primeira vez na fase 1). */
+  showTip: boolean;
 }
 
 export class HudScene extends Phaser.Scene {
@@ -39,6 +40,7 @@ export class HudScene extends Phaser.Scene {
   private volumeGroup!: Phaser.GameObjects.Container;
   private totalCrystals = 0;
   private timeLimit = 0;
+  private showTip = false;
 
   constructor() {
     super(SCENES.HUD);
@@ -47,16 +49,17 @@ export class HudScene extends Phaser.Scene {
   init(data: HudSceneData): void {
     this.totalCrystals = data.totalCrystals;
     this.timeLimit = data.timeLimit;
+    this.showTip = data.showTip;
   }
 
   create(): void {
     // Faixa de fundo no topo da tela
-    this.add.rectangle(0, 0, GAME_WIDTH, HUD_HEIGHT, HUD.background).setOrigin(0).setStrokeStyle(2, HUD.border);
+    this.add.rectangle(0, 0, GAME_WIDTH, HUD_HEIGHT, theme.colors.hudBackground).setOrigin(0).setStrokeStyle(2, theme.colors.hudBorder);
 
     const middleY = HUD_HEIGHT / 2;
-    this.crystalText = this.add.text(16, middleY, '', textStyle(HUD.fontSize, TEXT_COLORS.normal, true)).setOrigin(0, 0.5);
-    this.portalText = this.add.text(190, middleY, '', textStyle(HUD.fontSize, TEXT_COLORS.muted, true)).setOrigin(0, 0.5);
-    this.timeText = this.add.text(420, middleY, '', textStyle(HUD.fontSize, TEXT_COLORS.normal, true)).setOrigin(0, 0.5);
+    this.crystalText = this.add.text(16, middleY, '', textStyle(HUD.fontSize, theme.text.normal, true)).setOrigin(0, 0.5);
+    this.portalText = this.add.text(190, middleY, '', textStyle(HUD.fontSize, theme.text.muted, true)).setOrigin(0, 0.5);
+    this.timeText = this.add.text(420, middleY, '', textStyle(HUD.fontSize, theme.text.normal, true)).setOrigin(0, 0.5);
 
     this.updateCrystals(0, this.totalCrystals);
     this.portalText.setText('Portal: bloqueado');
@@ -65,9 +68,11 @@ export class HudScene extends Phaser.Scene {
     // Indicador de volume: ícone + porcentagem, dentro de um container
     // (assim conseguimos "pulsar" os dois juntos quando o volume muda)
     this.volumeIcon = this.add.graphics();
-    this.volumeText = this.add.text(18, 0, '', textStyle(HUD.fontSize, TEXT_COLORS.normal, true)).setOrigin(0, 0.5);
+    this.volumeText = this.add.text(18, 0, '', textStyle(HUD.fontSize, theme.text.normal, true)).setOrigin(0, 0.5);
     this.volumeGroup = this.add.container(VOLUME_X, middleY, [this.volumeIcon, this.volumeText]);
     this.drawVolume(AudioManager.get().getSettings());
+
+    if (this.showTip) this.showFirstTip();
 
     // ---- Escuta os eventos da GameScene ----
     const events = this.game.events;
@@ -97,13 +102,13 @@ export class HudScene extends Phaser.Scene {
   /** Atualiza o cronômetro; nos últimos segundos ele fica vermelho. */
   private updateTime(secondsLeft: number): void {
     this.timeText.setText(`Tempo: ${formatTime(secondsLeft)}`);
-    this.timeText.setColor(secondsLeft <= TIME_WARNING_SECONDS ? TEXT_COLORS.danger : TEXT_COLORS.normal);
+    this.timeText.setColor(secondsLeft <= TIME_WARNING_SECONDS ? theme.text.danger : theme.text.normal);
   }
 
   /** Mostra "-5s" subindo e sumindo ao lado do tempo. */
   private showHit(secondsLost: number): void {
     const label = this.add
-      .text(this.timeText.x + this.timeText.width + 12, HUD_HEIGHT / 2, `-${secondsLost}s`, textStyle(HUD.fontSize, TEXT_COLORS.danger, true))
+      .text(this.timeText.x + this.timeText.width + 12, HUD_HEIGHT / 2, `-${secondsLost}s`, textStyle(HUD.fontSize, theme.text.danger, true))
       .setOrigin(0, 0.5);
     this.tweens.add({ targets: label, y: label.y + 30, alpha: 0, duration: 900, onComplete: () => label.destroy() });
   }
@@ -113,7 +118,7 @@ export class HudScene extends Phaser.Scene {
     this.drawVolume(settings);
 
     // Destaque: o indicador cresce, fica amarelo e depois volta ao normal
-    this.volumeText.setColor(TEXT_COLORS.title);
+    this.volumeText.setColor(theme.text.title);
     this.tweens.killTweensOf(this.volumeGroup);
     this.volumeGroup.setScale(1);
     this.tweens.add({
@@ -122,7 +127,7 @@ export class HudScene extends Phaser.Scene {
       duration: 120,
       yoyo: true,
       hold: 500, // fica grande por meio segundo
-      onComplete: () => this.volumeText.setColor(TEXT_COLORS.normal),
+      onComplete: () => this.volumeText.setColor(theme.text.normal),
     });
   }
 
@@ -133,7 +138,7 @@ export class HudScene extends Phaser.Scene {
   private drawVolume(settings: Settings): void {
     const silent = settings.mudo || settings.volumeGeral === 0;
     const g = this.volumeIcon;
-    const color = silent ? COLORS.buttonBorder : COLORS.primary;
+    const color = silent ? theme.colors.buttonBorder : theme.colors.primary;
     g.clear();
 
     // Corpo do alto-falante: um retângulo e um trapézio (o "cone")
@@ -143,7 +148,7 @@ export class HudScene extends Phaser.Scene {
 
     if (silent) {
       // "X" vermelho de mudo
-      g.lineStyle(2, COLORS.danger);
+      g.lineStyle(2, theme.colors.danger);
       g.lineBetween(3, -5, 11, 5);
       g.lineBetween(3, 5, 11, -5);
     } else {
@@ -161,12 +166,33 @@ export class HudScene extends Phaser.Scene {
     this.volumeText.setText(settings.mudo ? 'Mudo' : `${Math.round(settings.volumeGeral * 100)}%`);
   }
 
+  /** Dica rápida do objetivo, na parte de baixo da tela; some sozinha. */
+  private showFirstTip(): void {
+    const y = GAME_HEIGHT - 40;
+    const text = this.add.text(GAME_WIDTH / 2, y, FIRST_TIP, textStyle(22, theme.text.title, true)).setOrigin(0.5);
+    const box = this.add
+      .rectangle(GAME_WIDTH / 2, y, text.width + 40, text.height + 20, theme.colors.panel, 0.92)
+      .setStrokeStyle(2, theme.colors.accent);
+    text.setDepth(1); // texto por cima da caixa
+
+    // Aparece subindo, fica alguns segundos e desaparece
+    [box, text].forEach((obj) => obj.setAlpha(0).setY(y + 20));
+    this.tweens.add({ targets: [box, text], alpha: 1, y, duration: 400, ease: 'Quad.easeOut' });
+    this.tweens.add({
+      targets: [box, text],
+      alpha: 0,
+      delay: HUD.tipDuration,
+      duration: 500,
+      onComplete: () => [box, text].forEach((obj) => obj.destroy()),
+    });
+  }
+
   private showPortalUnlocked(): void {
-    this.portalText.setText('Portal: liberado').setColor(TEXT_COLORS.portalOpen);
+    this.portalText.setText('Portal: liberado').setColor(theme.text.portalOpen);
 
     // Mensagem grande no meio da tela que some sozinha
     const message = this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'Portal liberado!', textStyle(40, TEXT_COLORS.portalOpen, true))
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'Portal liberado!', textStyle(40, theme.text.portalOpen, true))
       .setOrigin(0.5)
       .setStroke('#000000', 6)
       .setScale(0.5);

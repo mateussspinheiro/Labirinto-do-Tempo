@@ -140,8 +140,14 @@ export class AudioManager {
   /** Sempre que algo muda: aplica no Phaser, salva e avisa as cenas (HUD). */
   private onSettingsChanged(): void {
     this.applyToPhaser();
-    SaveManager.saveSettings(this.settings);
+    SaveManager.saveSettings(this.audioSettings());
     this.game.events.emit(AUDIO_EVENTS.VOLUME_CHANGED, this.getSettings());
+  }
+
+  /** Só os campos de áudio (o resto das configurações não é deste módulo). */
+  private audioSettings(): Partial<Settings> {
+    const { volumeGeral, volumeMusica, volumeEfeitos, mudo } = this.settings;
+    return { volumeGeral, volumeMusica, volumeEfeitos, mudo };
   }
 
   /** Passa os valores atuais para o sistema de som do Phaser. */

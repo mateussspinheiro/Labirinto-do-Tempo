@@ -35,6 +35,10 @@ export interface Settings {
   volumeMusica: number;
   volumeEfeitos: number;
   mudo: boolean;
+  /** Acessibilidade: cores de alto contraste. */
+  altoContraste: boolean;
+  /** Acessibilidade: textos 20% maiores. */
+  textoGrande: boolean;
 }
 
 /** Resultado de uma partida, enviado para a ResultScene. */
@@ -66,4 +70,6 @@ export interface LevelProgress {
 /** Tudo o que é salvo sobre o progresso: uma entrada por fase (chave = id). */
 export interface SaveData {
   levels: Record<number, LevelProgress>;
+  /** Se a dica inicial da fase 1 já foi mostrada. */
+  tipShown?: boolean;
 }

@@ -11,7 +11,11 @@ export const GAME_TITLE = 'Labirinto do Tempo';
 export const GAME_WIDTH = 800;
 export const GAME_HEIGHT = 600;
 
-/** Paleta de cores usada nas telas (formato 0xRRGGBB para o Phaser). */
+/**
+ * Paleta de cores usada nas telas (formato 0xRRGGBB para o Phaser).
+ * As cenas NÃO usam esta paleta direto: usam theme.colors (Theme.ts),
+ * que troca para a paleta de alto contraste quando ela está ligada.
+ */
 export const COLORS = {
   background: 0x0b0e1a,
   panel: 0x161b33,
@@ -22,6 +26,8 @@ export const COLORS = {
   buttonDisabled: 0x2a2d3e,
   buttonBorder: 0x7986cb,
   danger: 0xef5350,
+  hudBackground: 0x0f1328,
+  hudBorder: 0x3949ab,
 };
 
 /** As mesmas cores em formato texto (CSS), usadas pelos objetos de texto. */
@@ -34,6 +40,36 @@ export const TEXT_COLORS = {
   muted: '#9fa8da',
   disabled: '#5c6080',
 };
+
+// ---------------- Acessibilidade ----------------
+
+/** Alto contraste: fundo preto, texto branco e destaques em amarelo forte. */
+export const HIGH_CONTRAST_COLORS: typeof COLORS = {
+  background: 0x000000,
+  panel: 0x000000,
+  primary: 0x00e5ff,
+  accent: 0xffff00,
+  buttonIdle: 0x000000,
+  buttonFocus: 0x333300,
+  buttonDisabled: 0x000000,
+  buttonBorder: 0xffffff,
+  danger: 0xff5252,
+  hudBackground: 0x000000,
+  hudBorder: 0xffffff,
+};
+
+export const HIGH_CONTRAST_TEXT_COLORS: typeof TEXT_COLORS = {
+  title: '#ffff00',
+  normal: '#ffffff',
+  success: '#69f0ae',
+  danger: '#ff5252',
+  portalOpen: '#ff80ff',
+  muted: '#ffffff',
+  disabled: '#9e9e9e',
+};
+
+/** "Texto maior": todas as fontes ficam 20% maiores. */
+export const LARGE_TEXT_SCALE = 1.2;
 
 /** Fonte padrão de todos os textos. */
 export const FONT_FAMILY = 'Arial, Helvetica, sans-serif';
@@ -78,6 +114,11 @@ export const MAZE_COLORS = {
   wallBorder: 0x1a237e,
   floor: 0x1b2040,
   floorLine: 0x232a52,
+  // Versões de alto contraste do labirinto: paredes claras e chão preto
+  wallHighContrast: 0xe0e0e0,
+  wallBorderHighContrast: 0x757575,
+  floorHighContrast: 0x000000,
+  floorLineHighContrast: 0x1a1a1a,
   player: 0x4caf50,
   crystal: 0x4dd0e1,
   crystalShine: 0xe0f7fa,
@@ -94,6 +135,8 @@ export const MAZE_COLORS = {
 export const TEXTURES = {
   WALL: 'wall',
   FLOOR: 'floor',
+  WALL_HC: 'wall-hc', // alto contraste
+  FLOOR_HC: 'floor-hc',
   PLAYER: 'player',
   CRYSTAL: 'crystal',
   PORTAL_LOCKED: 'portal-locked',
@@ -115,13 +158,15 @@ export const GAME_EVENTS = {
   PLAYER_HIT: 'player-hit', // (segundosPerdidos: number)
 } as const;
 
-/** Cores e tamanhos do HUD. */
+/** Tamanhos e tempos do HUD (as cores ficam em COLORS.hud*). */
 export const HUD = {
-  background: 0x0f1328,
-  border: 0x3949ab,
   fontSize: 20,
   messageDuration: 1800, // ms que a mensagem "Portal liberado!" fica na tela
+  tipDuration: 4500, // ms que a dica inicial da fase 1 fica na tela
 };
+
+/** Dica mostrada na primeira vez que o jogador entra na fase 1. */
+export const FIRST_TIP = 'Colete os 3 cristais e entre no portal';
 
 /** Tempo (ms) entre o fim da fase (vitória ou derrota) e a tela de resultado. */
 export const LEVEL_END_DELAY = 1200;

@@ -5,6 +5,7 @@
 import Phaser from 'phaser';
 import { SCENES } from '../config/constants';
 import { AudioManager } from '../systems/AudioManager';
+import { loadAccessibility } from '../ui/Theme';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -17,6 +18,8 @@ export class BootScene extends Phaser.Scene {
 
     // Cria o AudioManager (ele já carrega o volume salvo no localStorage)
     AudioManager.init(this.game);
+    // Aplica as opções de acessibilidade salvas (alto contraste, texto maior)
+    loadAccessibility();
 
     this.scene.start(SCENES.PRELOAD);
   }

@@ -8,9 +8,9 @@
 // Sempre que o valor muda, chama a função onChange(valor).
 // =============================================================
 import Phaser from 'phaser';
-import { AUDIO, COLORS, SLIDER, TEXT_COLORS } from '../config/constants';
+import { AUDIO, SLIDER } from '../config/constants';
 import type { Focusable } from './Button';
-import { textStyle } from './Theme';
+import { textStyle, theme } from './Theme';
 
 export class Slider extends Phaser.GameObjects.Container implements Focusable {
   private value: number;
@@ -38,13 +38,13 @@ export class Slider extends Phaser.GameObjects.Container implements Focusable {
     const half = SLIDER.width / 2;
 
     // Rótulo à esquerda e porcentagem à direita, acima da barra
-    this.labelText = scene.add.text(-half, -24, label, textStyle(SLIDER.fontSize, TEXT_COLORS.normal, true)).setOrigin(0, 0.5);
-    this.valueText = scene.add.text(half, -24, '', textStyle(SLIDER.fontSize, TEXT_COLORS.normal, true)).setOrigin(1, 0.5);
+    this.labelText = scene.add.text(-half, -24, label, textStyle(SLIDER.fontSize, theme.text.normal, true)).setOrigin(0, 0.5);
+    this.valueText = scene.add.text(half, -24, '', textStyle(SLIDER.fontSize, theme.text.normal, true)).setOrigin(1, 0.5);
 
     // Barra de fundo, preenchimento (parte "cheia") e bolinha
-    const track = scene.add.rectangle(0, 0, SLIDER.width, SLIDER.trackHeight, COLORS.buttonIdle).setStrokeStyle(1, COLORS.buttonBorder);
-    this.fill = scene.add.rectangle(-half, 0, 0, SLIDER.trackHeight, COLORS.primary).setOrigin(0, 0.5);
-    this.handle = scene.add.circle(0, 0, SLIDER.handleRadius, COLORS.accent);
+    const track = scene.add.rectangle(0, 0, SLIDER.width, SLIDER.trackHeight, theme.colors.buttonIdle).setStrokeStyle(1, theme.colors.buttonBorder);
+    this.fill = scene.add.rectangle(-half, 0, 0, SLIDER.trackHeight, theme.colors.primary).setOrigin(0, 0.5);
+    this.handle = scene.add.circle(0, 0, SLIDER.handleRadius, theme.colors.accent);
 
     // Área invisível maior que a barra, para facilitar o clique
     const hitArea = scene.add.rectangle(0, 0, SLIDER.width + SLIDER.handleRadius * 2, SLIDER.handleRadius * 3, 0x000000, 0);
@@ -97,8 +97,8 @@ export class Slider extends Phaser.GameObjects.Container implements Focusable {
   }
 
   setFocused(value: boolean): this {
-    this.labelText.setColor(value ? TEXT_COLORS.title : TEXT_COLORS.normal);
-    this.handle.setStrokeStyle(value ? 4 : 0, COLORS.primary);
+    this.labelText.setColor(value ? theme.text.title : theme.text.normal);
+    this.handle.setStrokeStyle(value ? 4 : 0, theme.colors.primary);
     this.handle.setRadius(value ? SLIDER.handleRadius + 2 : SLIDER.handleRadius);
     return this;
   }

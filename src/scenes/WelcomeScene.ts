@@ -4,8 +4,8 @@
 // depois da primeira interação do usuário.
 // =============================================================
 import Phaser from 'phaser';
-import { SCENES, GAME_TITLE, GAME_WIDTH, GAME_HEIGHT, TEXT_COLORS } from '../config/constants';
-import { textStyle } from '../ui/Theme';
+import { SCENES, GAME_TITLE, GAME_WIDTH, GAME_HEIGHT } from '../config/constants';
+import { textStyle, theme } from '../ui/Theme';
 
 export class WelcomeScene extends Phaser.Scene {
   constructor() {
@@ -13,7 +13,7 @@ export class WelcomeScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 60, GAME_TITLE, textStyle(52, TEXT_COLORS.title, true)).setOrigin(0.5);
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 60, GAME_TITLE, textStyle(52, theme.text.title, true)).setOrigin(0.5);
 
     const hint = this.add
       .text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 60, 'Clique ou pressione Enter para começar', textStyle(22))

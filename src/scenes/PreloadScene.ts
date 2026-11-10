@@ -5,9 +5,9 @@
 // (texturas geradas), então não dependemos de arquivos externos.
 // =============================================================
 import Phaser from 'phaser';
-import { SCENES, GAME_WIDTH, GAME_HEIGHT, COLORS, MAZE_COLORS, TEXTURES, TILE_SIZE } from '../config/constants';
+import { SCENES, GAME_WIDTH, GAME_HEIGHT, MAZE_COLORS, TEXTURES, TILE_SIZE } from '../config/constants';
 import { SoundSynth } from '../systems/SoundSynth';
-import { textStyle } from '../ui/Theme';
+import { textStyle, theme } from '../ui/Theme';
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -49,9 +49,9 @@ export class PreloadScene extends Phaser.Scene {
     this.add.text(GAME_WIDTH / 2, y - 40, 'Carregando...', textStyle(24)).setOrigin(0.5);
 
     // Moldura da barra
-    this.add.rectangle(x, y, barWidth, barHeight).setOrigin(0).setStrokeStyle(2, COLORS.primary);
+    this.add.rectangle(x, y, barWidth, barHeight).setOrigin(0).setStrokeStyle(2, theme.colors.primary);
     // Preenchimento: começa com largura 0 e cresce conforme o progresso (0 a 1)
-    const fill = this.add.rectangle(x + 2, y + 2, 0, barHeight - 4, COLORS.primary).setOrigin(0);
+    const fill = this.add.rectangle(x + 2, y + 2, 0, barHeight - 4, theme.colors.primary).setOrigin(0);
 
     this.load.on('progress', (value: number) => {
       fill.width = (barWidth - 4) * value;
@@ -65,17 +65,25 @@ export class PreloadScene extends Phaser.Scene {
   private generateTextures(): void {
     const g = this.make.graphics({}, false); // "pincel" que não aparece na tela
 
-    // Parede: quadrado com borda escura
-    g.fillStyle(MAZE_COLORS.wallBorder).fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-    g.fillStyle(MAZE_COLORS.wall).fillRect(2, 2, TILE_SIZE - 4, TILE_SIZE - 4);
-    g.generateTexture(TEXTURES.WALL, TILE_SIZE, TILE_SIZE);
-    g.clear();
+    // Parede: quadrado com borda escura (versão normal e de alto contraste)
+    const drawWall = (key: string, border: number, fill: number) => {
+      g.fillStyle(border).fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+      g.fillStyle(fill).fillRect(2, 2, TILE_SIZE - 4, TILE_SIZE - 4);
+      g.generateTexture(key, TILE_SIZE, TILE_SIZE);
+      g.clear();
+    };
+    drawWall(TEXTURES.WALL, MAZE_COLORS.wallBorder, MAZE_COLORS.wall);
+    drawWall(TEXTURES.WALL_HC, MAZE_COLORS.wallBorderHighContrast, MAZE_COLORS.wallHighContrast);
 
-    // Chão: quadrado escuro com uma linha sutil
-    g.fillStyle(MAZE_COLORS.floorLine).fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-    g.fillStyle(MAZE_COLORS.floor).fillRect(1, 1, TILE_SIZE - 1, TILE_SIZE - 1);
-    g.generateTexture(TEXTURES.FLOOR, TILE_SIZE, TILE_SIZE);
-    g.clear();
+    // Chão: quadrado escuro com uma linha sutil (normal e alto contraste)
+    const drawFloor = (key: string, line: number, fill: number) => {
+      g.fillStyle(line).fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+      g.fillStyle(fill).fillRect(1, 1, TILE_SIZE - 1, TILE_SIZE - 1);
+      g.generateTexture(key, TILE_SIZE, TILE_SIZE);
+      g.clear();
+    };
+    drawFloor(TEXTURES.FLOOR, MAZE_COLORS.floorLine, MAZE_COLORS.floor);
+    drawFloor(TEXTURES.FLOOR_HC, MAZE_COLORS.floorLineHighContrast, MAZE_COLORS.floorHighContrast);
 
     // Jogador: círculo verde
     g.fillStyle(MAZE_COLORS.player).fillCircle(12, 12, 12);

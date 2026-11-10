@@ -4,9 +4,9 @@
 // um botão "Voltar ao menu" (que também funciona com a tecla ESC).
 // =============================================================
 import Phaser from 'phaser';
-import { COLORS, GAME_TITLE, GAME_WIDTH, GAME_HEIGHT, SCENES, TEXT_COLORS } from '../config/constants';
+import { GAME_TITLE, GAME_WIDTH, GAME_HEIGHT, SCENES } from '../config/constants';
 import { Button } from './Button';
-import { textStyle } from './Theme';
+import { textStyle, theme } from './Theme';
 
 /** Posição vertical do botão de voltar (rodapé da tela). */
 const BACK_BUTTON_Y = GAME_HEIGHT - 50;
@@ -27,11 +27,11 @@ export interface ScreenFrameOptions {
  */
 export function addScreenFrame(scene: Phaser.Scene, screenTitle: string, options: ScreenFrameOptions = {}): Button {
   if (options.opaque) {
-    scene.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.background).setOrigin(0);
+    scene.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, theme.colors.background).setOrigin(0);
   }
 
-  scene.add.text(GAME_WIDTH / 2, 30, GAME_TITLE, textStyle(20, TEXT_COLORS.muted, true)).setOrigin(0.5);
-  scene.add.text(GAME_WIDTH / 2, 70, screenTitle, textStyle(36, TEXT_COLORS.title, true)).setOrigin(0.5);
+  scene.add.text(GAME_WIDTH / 2, 30, GAME_TITLE, textStyle(20, theme.text.muted, true)).setOrigin(0.5);
+  scene.add.text(GAME_WIDTH / 2, 70, screenTitle, textStyle(36, theme.text.title, true)).setOrigin(0.5);
 
   const goBack = options.onBack ?? (() => scene.scene.start(SCENES.MENU));
   scene.input.keyboard?.on('keydown-ESC', goBack);

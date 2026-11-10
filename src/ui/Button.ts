@@ -6,9 +6,9 @@
 //   escolher com as setas (ou W/S) e confirmar com Enter ou Espaço.
 // =============================================================
 import Phaser from 'phaser';
-import { BUTTON, COLORS, SOUNDS, TEXT_COLORS } from '../config/constants';
+import { BUTTON, SOUNDS } from '../config/constants';
 import { AudioManager } from '../systems/AudioManager';
-import { textStyle } from './Theme';
+import { textStyle, theme } from './Theme';
 
 /**
  * Qualquer elemento que pode receber o foco do teclado (botão ou slider).
@@ -51,10 +51,10 @@ export class Button extends Phaser.GameObjects.Container implements Focusable {
 
     // Fundo do botão (centralizado no ponto x,y do container)
     this.background = scene.add
-      .rectangle(0, 0, width, height, COLORS.buttonIdle)
-      .setStrokeStyle(2, COLORS.buttonBorder);
+      .rectangle(0, 0, width, height, theme.colors.buttonIdle)
+      .setStrokeStyle(2, theme.colors.buttonBorder);
 
-    this.label = scene.add.text(0, 0, text, textStyle(options.fontSize ?? BUTTON.fontSize, TEXT_COLORS.normal, true)).setOrigin(0.5);
+    this.label = scene.add.text(0, 0, text, textStyle(options.fontSize ?? BUTTON.fontSize, theme.text.normal, true)).setOrigin(0.5);
 
     this.add([this.background, this.label]);
     scene.add.existing(this);
@@ -100,15 +100,15 @@ export class Button extends Phaser.GameObjects.Container implements Focusable {
   /** Atualiza cores conforme o estado (normal, focado, desabilitado). */
   private refresh(): void {
     if (!this.enabled) {
-      this.background.setFillStyle(COLORS.buttonDisabled);
-      this.background.setStrokeStyle(2, COLORS.buttonDisabled);
-      this.label.setColor(TEXT_COLORS.disabled);
+      this.background.setFillStyle(theme.colors.buttonDisabled);
+      this.background.setStrokeStyle(2, theme.colors.buttonDisabled);
+      this.label.setColor(theme.text.disabled);
       this.setScale(1);
       return;
     }
-    this.background.setFillStyle(this.focused ? COLORS.buttonFocus : COLORS.buttonIdle);
-    this.background.setStrokeStyle(this.focused ? 3 : 2, this.focused ? COLORS.accent : COLORS.buttonBorder);
-    this.label.setColor(this.focused ? TEXT_COLORS.title : TEXT_COLORS.normal);
+    this.background.setFillStyle(this.focused ? theme.colors.buttonFocus : theme.colors.buttonIdle);
+    this.background.setStrokeStyle(this.focused ? 3 : 2, this.focused ? theme.colors.accent : theme.colors.buttonBorder);
+    this.label.setColor(this.focused ? theme.text.title : theme.text.normal);
     this.setScale(this.focused ? 1.05 : 1);
   }
 }

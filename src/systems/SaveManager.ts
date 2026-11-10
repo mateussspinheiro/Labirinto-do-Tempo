@@ -17,6 +17,8 @@ export const DEFAULT_SETTINGS: Settings = {
   volumeMusica: AUDIO.defaultMusic,
   volumeEfeitos: AUDIO.defaultSfx,
   mudo: false,
+  altoContraste: false,
+  textoGrande: false,
 };
 
 export class SaveManager {
@@ -30,8 +32,13 @@ export class SaveManager {
     return { ...DEFAULT_SETTINGS, ...saved };
   }
 
-  static saveSettings(settings: Settings): void {
-    SaveManager.write(STORAGE_KEYS.SETTINGS, settings);
+  /**
+   * Salva só os campos informados, mantendo os outros como estão.
+   * Assim o AudioManager (volumes) e o Theme (acessibilidade) gravam
+   * suas partes sem apagar a parte um do outro.
+   */
+  static saveSettings(changes: Partial<Settings>): void {
+    SaveManager.write(STORAGE_KEYS.SETTINGS, { ...SaveManager.loadSettings(), ...changes });
   }
 
   // ---------------- Progresso ----------------
@@ -71,6 +78,17 @@ export class SaveManager {
 
     SaveManager.write(STORAGE_KEYS.PROGRESS, data);
     return newRecord;
+  }
+
+  /** Se a dica "Colete os 3 cristais..." ainda não foi mostrada. */
+  static shouldShowTip(): boolean {
+    return SaveManager.loadProgress().tipShown !== true;
+  }
+
+  static markTipShown(): void {
+    const data = SaveManager.loadProgress();
+    data.tipShown = true;
+    SaveManager.write(STORAGE_KEYS.PROGRESS, data);
   }
 
   /** Apaga todo o progresso (as configurações de volume continuam). */

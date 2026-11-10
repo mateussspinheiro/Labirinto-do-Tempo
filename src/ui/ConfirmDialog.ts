@@ -4,9 +4,9 @@
 // Enquanto está aberta, os botões da tela de baixo ficam inativos.
 // =============================================================
 import Phaser from 'phaser';
-import { COLORS, GAME_WIDTH, GAME_HEIGHT, TEXT_COLORS } from '../config/constants';
+import { GAME_WIDTH, GAME_HEIGHT } from '../config/constants';
 import { Button, ButtonGroup } from './Button';
-import { textStyle } from './Theme';
+import { textStyle, theme } from './Theme';
 
 /** Profundidade (depth) alta para a janela ficar por cima de tudo. */
 const DIALOG_DEPTH = 100;
@@ -31,10 +31,10 @@ export function showConfirmDialog(
 
   // Fundo escuro que cobre a tela toda. Ele é "interativo" só para
   // bloquear cliques nos botões que ficaram por baixo.
-  const shade = scene.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.background, 0.8).setOrigin(0).setInteractive();
-  const panel = scene.add.rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, COLORS.panel).setStrokeStyle(3, COLORS.accent);
+  const shade = scene.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, theme.colors.background, 0.8).setOrigin(0).setInteractive();
+  const panel = scene.add.rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, theme.colors.panel).setStrokeStyle(3, theme.colors.accent);
   const text = scene.add
-    .text(centerX, centerY - 50, message, { ...textStyle(22, TEXT_COLORS.normal), align: 'center', wordWrap: { width: PANEL_WIDTH - 60 } })
+    .text(centerX, centerY - 50, message, { ...textStyle(22, theme.text.normal), align: 'center', wordWrap: { width: PANEL_WIDTH - 60 } })
     .setOrigin(0.5);
 
   const close = () => {

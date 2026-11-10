@@ -10,6 +10,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, HUD_HEIGHT, MAP_CHARS, TEXTURES, TILE_SIZE } from '../config/constants';
 import type { LevelData, PatrolPath, Point } from '../types';
+import { theme } from '../ui/Theme';
 
 /** Resultado da leitura do mapa. */
 export interface LoadedLevel {
@@ -53,18 +54,22 @@ export class LevelLoader {
       offset: this.offset,
     };
 
+    // No modo alto contraste, usa as imagens de parede/chão mais contrastantes
+    const wallTexture = theme.highContrast ? TEXTURES.WALL_HC : TEXTURES.WALL;
+    const floorTexture = theme.highContrast ? TEXTURES.FLOOR_HC : TEXTURES.FLOOR;
+
     this.level.mapa.forEach((line, row) => {
       [...line].forEach((char, col) => {
         const pos = this.tileToWorld(col, row);
 
         if (char === MAP_CHARS.WALL) {
           // Parede: imagem com corpo físico estático (não se move)
-          walls.create(pos.x, pos.y, TEXTURES.WALL);
+          walls.create(pos.x, pos.y, wallTexture);
           return;
         }
 
         // Qualquer outro símbolo tem chão por baixo
-        this.scene.add.image(pos.x, pos.y, TEXTURES.FLOOR);
+        this.scene.add.image(pos.x, pos.y, floorTexture);
 
         switch (char) {
           case MAP_CHARS.PLAYER:

@@ -3,7 +3,7 @@
 // Cria o Phaser.Game com as configurações gerais e a lista de cenas.
 // =============================================================
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, COLORS } from './config/constants';
+import { GAME_WIDTH, GAME_HEIGHT } from './config/constants';
 import { BootScene } from './scenes/BootScene';
 import { PreloadScene } from './scenes/PreloadScene';
 import { WelcomeScene } from './scenes/WelcomeScene';
@@ -23,7 +23,9 @@ const config: Phaser.Types.Core.GameConfig = {
   parent: 'game', // <div id="game"> do index.html
   width: GAME_WIDTH,
   height: GAME_HEIGHT,
-  backgroundColor: COLORS.background,
+  // Canvas transparente: a cor de fundo vem da página (o tema troca essa
+  // cor no modo alto contraste, veja applyAccessibility em Theme.ts)
+  transparent: true,
   scale: {
     mode: Phaser.Scale.FIT, // estica mantendo a proporção 4:3
     autoCenter: Phaser.Scale.CENTER_BOTH, // centraliza na tela

@@ -5,13 +5,13 @@
 // (informação lida do SaveManager / localStorage).
 // =============================================================
 import Phaser from 'phaser';
-import { SCENES, GAME_WIDTH, SOUNDS, TEXT_COLORS } from '../config/constants';
+import { SCENES, GAME_WIDTH, SOUNDS } from '../config/constants';
 import { LEVELS } from '../levels';
 import { AudioManager } from '../systems/AudioManager';
 import { SaveManager } from '../systems/SaveManager';
 import { Button, ButtonGroup } from '../ui/Button';
 import { addScreenFrame } from '../ui/ScreenFrame';
-import { formatTime, starsText, textStyle } from '../ui/Theme';
+import { formatTime, starsText, textStyle, theme } from '../ui/Theme';
 
 /** Distância vertical entre as fases na lista. */
 const ROW_HEIGHT = 110;
@@ -39,7 +39,7 @@ export class LevelSelectScene extends Phaser.Scene {
       let info = `Tempo: ${formatTime(level.tempoLimite)}  ·  Ainda não concluída`;
       if (!unlocked) info = `Conclua a fase ${level.id - 1} para liberar`;
       else if (progress) info = `${starsText(progress.bestStars)}  ·  Melhor tempo: ${formatTime(progress.bestTime)}  ·  Recorde: ${progress.bestScore} pts`;
-      this.add.text(centerX, y + 40, info, textStyle(16, unlocked ? TEXT_COLORS.muted : TEXT_COLORS.disabled)).setOrigin(0.5);
+      this.add.text(centerX, y + 40, info, textStyle(16, unlocked ? theme.text.muted : theme.text.disabled)).setOrigin(0.5);
 
       return button;
     });
