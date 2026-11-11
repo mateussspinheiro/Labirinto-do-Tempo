@@ -1,15 +1,16 @@
 // =============================================================
 // SaveManager.ts — lê e grava dados no localStorage do navegador.
 // Guarda duas coisas, em chaves separadas:
-//   - configurações (volume etc.);
-//   - progresso: fases concluídas, melhor tempo e melhor pontuação.
+//   - configurações (volume, acessibilidade, dificuldade);
+//   - progresso: para CADA dificuldade, as fases concluídas,
+//     o melhor tempo, a melhor pontuação e as estrelas.
 //
 // O localStorage guarda apenas TEXTO. Por isso convertemos os
 // objetos para JSON ao salvar (JSON.stringify) e de volta ao
 // carregar (JSON.parse).
 // =============================================================
-import { AUDIO, STORAGE_KEYS } from '../config/constants';
-import type { LevelProgress, LevelResult, SaveData, Settings } from '../types';
+import { AUDIO, DEFAULT_DIFFICULTY, STORAGE_KEYS } from '../config/constants';
+import type { DifficultyId, LevelProgress, LevelResult, SaveData, Settings } from '../types';
 
 /** Configurações usadas na primeira vez que o jogo é aberto. */
 const DEFAULT_SETTINGS: Settings = {
@@ -19,7 +20,13 @@ const DEFAULT_SETTINGS: Settings = {
   mudo: false,
   altoContraste: false,
   textoGrande: false,
+  dificuldade: DEFAULT_DIFFICULTY,
 };
+
+/** Formato antigo do progresso (antes das dificuldades): só uma lista de fases. */
+interface OldSaveData {
+  levels?: Record<number, LevelProgress>;
+}
 
 export class SaveManager {
   // ---------------- Configurações ----------------
@@ -34,8 +41,8 @@ export class SaveManager {
 
   /**
    * Salva só os campos informados, mantendo os outros como estão.
-   * Assim o AudioManager (volumes) e o Theme (acessibilidade) gravam
-   * suas partes sem apagar a parte um do outro.
+   * Assim o AudioManager (volumes), o Theme (acessibilidade) e a
+   * dificuldade gravam suas partes sem apagar a parte um do outro.
    */
   static saveSettings(changes: Partial<Settings>): void {
     SaveManager.write(STORAGE_KEYS.SETTINGS, { ...SaveManager.loadSettings(), ...changes });
@@ -44,17 +51,28 @@ export class SaveManager {
   // ---------------- Progresso ----------------
 
   static loadProgress(): SaveData {
-    return SaveManager.read<SaveData>(STORAGE_KEYS.PROGRESS) ?? { levels: {} };
+    const saved = SaveManager.read<SaveData & OldSaveData>(STORAGE_KEYS.PROGRESS);
+    if (!saved) return { progress: {} };
+
+    // Progresso salvo pela versão anterior (sem dificuldades):
+    // vira o progresso da dificuldade "Médio", que tem as mesmas regras.
+    if (saved.levels && !saved.progress) {
+      return { progress: { medio: saved.levels }, tipShown: saved.tipShown };
+    }
+    return { progress: saved.progress ?? {}, tipShown: saved.tipShown };
   }
 
-  /** Progresso de uma fase (undefined se o jogador nunca a concluiu). */
-  static getLevelProgress(levelId: number): LevelProgress | undefined {
-    return SaveManager.loadProgress().levels[levelId];
+  /** Progresso de uma fase em uma dificuldade (undefined se nunca concluída). */
+  static getLevelProgress(difficulty: DifficultyId, levelId: number): LevelProgress | undefined {
+    return SaveManager.loadProgress().progress[difficulty]?.[levelId];
   }
 
-  /** A fase 1 está sempre liberada; as outras, só depois de concluir a anterior. */
-  static isLevelUnlocked(levelId: number): boolean {
-    return levelId === 1 || SaveManager.getLevelProgress(levelId - 1)?.completed === true;
+  /**
+   * A fase 1 está sempre liberada; as outras, só depois de concluir
+   * a anterior NA MESMA dificuldade.
+   */
+  static isLevelUnlocked(difficulty: DifficultyId, levelId: number): boolean {
+    return levelId === 1 || SaveManager.getLevelProgress(difficulty, levelId - 1)?.completed === true;
   }
 
   /**
@@ -66,10 +84,11 @@ export class SaveManager {
     if (!result.victory) return false;
 
     const data = SaveManager.loadProgress();
-    const previous = data.levels[result.levelId];
+    const levels = (data.progress[result.difficultyId] ??= {});
+    const previous = levels[result.levelId];
     const newRecord = !previous || result.points > previous.bestScore;
 
-    data.levels[result.levelId] = {
+    levels[result.levelId] = {
       completed: true,
       bestTime: previous ? Math.min(previous.bestTime, result.timeUsed) : result.timeUsed,
       bestScore: previous ? Math.max(previous.bestScore, result.points) : result.points,
@@ -91,7 +110,7 @@ export class SaveManager {
     SaveManager.write(STORAGE_KEYS.PROGRESS, data);
   }
 
-  /** Apaga todo o progresso (as configurações de volume continuam). */
+  /** Apaga todo o progresso, de todas as dificuldades (as configurações continuam). */
   static clearProgress(): void {
     try {
       localStorage.removeItem(STORAGE_KEYS.PROGRESS);

@@ -6,9 +6,10 @@
 // ela é retomada (this.scene.resume) exatamente de onde parou.
 // =============================================================
 import Phaser from 'phaser';
-import { SCENES, GAME_WIDTH, GAME_HEIGHT, BUTTON } from '../config/constants';
+import { SCENES, GAME_WIDTH, GAME_HEIGHT, BUTTON, GLOW } from '../config/constants';
 import { Button, ButtonGroup } from '../ui/Button';
-import { textStyle, theme } from '../ui/Theme';
+import { addPanel } from '../ui/Panel';
+import { addGlow, theme, titleStyle } from '../ui/Theme';
 import type { HowToPlayData } from './HowToPlayScene';
 import { goToScene } from '../ui/Transition';
 import type { GameSceneData } from './GameScene';
@@ -37,10 +38,9 @@ export class PauseScene extends Phaser.Scene {
 
     // Fundo semitransparente: dá para ver a partida "congelada" atrás
     this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, theme.colors.background, 0.75).setOrigin(0);
-    this.add
-      .rectangle(centerX, GAME_HEIGHT / 2, 360, 400, theme.colors.panel)
-      .setStrokeStyle(3, theme.colors.buttonBorder);
-    this.add.text(centerX, 150, 'Pausado', textStyle(40, theme.text.title, true)).setOrigin(0.5);
+    addPanel(this, centerX, GAME_HEIGHT / 2, 380, 400, { fillAlpha: 0.95 });
+    const title = this.add.text(centerX, 150, 'PAUSADO', titleStyle(34)).setOrigin(0.5).setLetterSpacing(6);
+    addGlow(title, theme.colors.primary, GLOW.title);
 
     const firstY = 230;
     const buttons = [

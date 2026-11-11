@@ -8,9 +8,9 @@
 // Sempre que o valor muda, chama a função onChange(valor).
 // =============================================================
 import Phaser from 'phaser';
-import { AUDIO, SLIDER } from '../config/constants';
+import { AUDIO, GLOW, SLIDER } from '../config/constants';
 import type { Focusable } from './Button';
-import { textStyle, theme } from './Theme';
+import { addGlow, theme, titleStyle } from './Theme';
 
 export class Slider extends Phaser.GameObjects.Container implements Focusable {
   private value: number;
@@ -46,18 +46,19 @@ export class Slider extends Phaser.GameObjects.Container implements Focusable {
 
     // Rótulo à esquerda e porcentagem à direita, acima da barra
     this.labelText = scene.add
-      .text(-half, -24, label, textStyle(SLIDER.fontSize, theme.text.normal, true))
-      .setOrigin(0, 0.5);
-    this.valueText = scene.add
-      .text(half, -24, '', textStyle(SLIDER.fontSize, theme.text.normal, true))
-      .setOrigin(1, 0.5);
+      .text(-half, -22, label.toUpperCase(), titleStyle(SLIDER.fontSize, theme.text.normal))
+      .setOrigin(0, 0.5)
+      .setLetterSpacing(1);
+    this.valueText = scene.add.text(half, -22, '', titleStyle(SLIDER.fontSize, theme.text.title)).setOrigin(1, 0.5);
 
     // Barra de fundo, preenchimento (parte "cheia") e bolinha
     const track = scene.add
       .rectangle(0, 0, SLIDER.width, SLIDER.trackHeight, theme.colors.buttonIdle)
       .setStrokeStyle(1, theme.colors.buttonBorder);
     this.fill = scene.add.rectangle(-half, 0, 0, SLIDER.trackHeight, theme.colors.primary).setOrigin(0, 0.5);
-    this.handle = scene.add.circle(0, 0, SLIDER.handleRadius, theme.colors.accent);
+    this.handle = scene.add.circle(0, 0, SLIDER.handleRadius, 0xffffff);
+    // A parte "cheia" da barra brilha em neon
+    addGlow(this.fill, theme.colors.primary, GLOW.soft);
 
     // Área invisível maior que a barra, para facilitar o clique
     const hitArea = scene.add.rectangle(
@@ -114,7 +115,7 @@ export class Slider extends Phaser.GameObjects.Container implements Focusable {
 
   setFocused(value: boolean): this {
     this.labelText.setColor(value ? theme.text.title : theme.text.normal);
-    this.handle.setStrokeStyle(value ? 4 : 0, theme.colors.primary);
+    this.handle.setStrokeStyle(value ? 4 : 2, value ? theme.colors.primary : theme.colors.buttonBorder);
     this.handle.setRadius(value ? SLIDER.handleRadius + 2 : SLIDER.handleRadius);
     return this;
   }

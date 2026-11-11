@@ -6,6 +6,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config/constants';
 import { Button, ButtonGroup } from './Button';
+import { addPanel } from './Panel';
 import { textStyle, theme } from './Theme';
 
 /** Profundidade (depth) alta para a janela ficar por cima de tudo. */
@@ -35,9 +36,11 @@ export function showConfirmDialog(
     .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, theme.colors.background, 0.8)
     .setOrigin(0)
     .setInteractive();
-  const panel = scene.add
-    .rectangle(centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, theme.colors.panel)
-    .setStrokeStyle(3, theme.colors.accent);
+  const panel = addPanel(scene, centerX, centerY, PANEL_WIDTH, PANEL_HEIGHT, {
+    fillAlpha: 0.97,
+    border: theme.colors.secondary,
+    brackets: theme.colors.secondary,
+  });
   const text = scene.add
     .text(centerX, centerY - 50, message, {
       ...textStyle(22, theme.text.normal),

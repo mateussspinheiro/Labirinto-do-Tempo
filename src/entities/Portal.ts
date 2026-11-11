@@ -4,8 +4,9 @@
 //  - liberado: colorido e pulsando (o jogador pode entrar).
 // =============================================================
 import Phaser from 'phaser';
-import { EFFECT_COLORS, TEXTURES } from '../config/constants';
+import { EFFECT_COLORS, GLOW, TEXTURES } from '../config/constants';
 import { burstParticles } from '../ui/Effects';
+import { addGlow, theme } from '../ui/Theme';
 
 export class Portal extends Phaser.Physics.Arcade.Image {
   private unlocked = false;
@@ -25,6 +26,7 @@ export class Portal extends Phaser.Physics.Arcade.Image {
     if (this.unlocked) return;
     this.unlocked = true;
     this.setTexture(TEXTURES.PORTAL_OPEN);
+    addGlow(this, theme.colors.secondary, GLOW.strong);
     burstParticles(this.scene, this.x, this.y, EFFECT_COLORS.portalParticles, 28);
 
     // Brilho pulsando: aumenta/diminui o tamanho e a transparência sem parar

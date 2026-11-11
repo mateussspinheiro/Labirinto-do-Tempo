@@ -1,5 +1,5 @@
 // =============================================================
-// Player.ts — o jogador (Lucas).
+// Player.ts — o jogador (Rafael, o personagem principal).
 // Usa a física arcade: definimos a velocidade e o Phaser move o
 // sprite e impede que ele atravesse as paredes (collider na GameScene).
 // A animação de andar muda conforme a direção (frente, costas, lado).

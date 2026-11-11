@@ -29,7 +29,7 @@ const SCALE = 2; // ampliação final (16 × 2 = 32 px)
 const PALETTE = {
   '.': null, // transparente
   k: '#141428', // contorno
-  // Jogador (Lucas)
+  // Jogador (Rafael)
   h: '#5d4037', // cabelo
   s: '#ffcc99', // pele
   e: '#1a1a2e', // olhos
@@ -255,21 +255,24 @@ function savePng(name, grid) {
 
 // ---------------- Imagens calculadas ----------------
 
-/** Parede de tijolos: linhas de argamassa a cada 4 px, tijolos alternados. */
-function wall(brick, light, mortar) {
+/**
+ * Parede futurista: painel de metal escuro com borda, um reflexo
+ * claro no topo e à esquerda, duas "emendas" horizontais e uma
+ * luzinha acesa no canto (as bordas neon são desenhadas pelo jogo).
+ */
+function wall(colors) {
   return fromFunction((x, y) => {
-    const row = Math.floor(y / 4);
-    const shift = row % 2 === 0 ? 0 : 4; // tijolos desencontrados
-    if (y % 4 === 3 || (x + shift) % 8 === 7) return mortar;
-    if (y % 4 === 0) return light; // borda iluminada de cada tijolo
-    return brick;
+    if (x === 0 || y === 0 || x === 15 || y === 15) return colors.border;
+    if (x === 12 && y === 3) return colors.light; // luzinha
+    if (y === 1 || x === 1) return colors.highlight; // reflexo
+    if (y === 6 || y === 11) return colors.seam; // emendas do painel
+    return colors.fill;
   });
 }
 
-/** Chão de pedra: cor base, borda sutil e algumas "pedrinhas" fixas. */
-function floor(base, detail) {
-  const speckles = new Set(['3,5', '10,2', '12,11', '6,12', '1,9', '8,8']);
-  return fromFunction((x, y) => (x === 0 || y === 0 || speckles.has(`${x},${y}`) ? detail : base));
+/** Chão escuro com uma grade sutil (linhas na borda) e um ponto no centro. */
+function floor(base, line) {
+  return fromFunction((x, y) => (x === 0 || y === 0 || (x === 8 && y === 8) ? line : base));
 }
 
 /** Portal: anel (distância do centro) com redemoinho e núcleo. */
@@ -313,10 +316,16 @@ savePng('enemy.png', sheet(ENEMY_FEET.map((feet) => outline(fromText([...ENEMY_B
 savePng('crystal.png', outline(fromText(CRYSTAL)));
 savePng('portal-locked.png', portal(false));
 savePng('portal-open.png', portal(true));
-savePng('wall.png', wall('#3f51b5', '#5c6bc0', '#1a237e'));
-savePng('floor.png', floor('#1b2040', '#232a52'));
+savePng(
+  'wall.png',
+  wall({ fill: '#0c1630', border: '#050914', highlight: '#1a2b55', seam: '#08102a', light: '#00e5ff' }),
+);
+savePng('floor.png', floor('#060a16', '#0d1a36'));
 // Versões de alto contraste
-savePng('wall-hc.png', wall('#e0e0e0', '#ffffff', '#757575'));
+savePng(
+  'wall-hc.png',
+  wall({ fill: '#d0d0d0', border: '#757575', highlight: '#ffffff', seam: '#a0a0a0', light: '#000000' }),
+);
 savePng('floor-hc.png', floor('#000000', '#1a1a1a'));
 // Partícula: quadradinho branco 3×3 (o jogo pinta com a cor desejada)
 const white = hex('#ffffff');

@@ -14,7 +14,7 @@ ou fórmulas.
 
 | Arquivo | Conteúdo | Origem | Licença |
 |---|---|---|---|
-| `player.png` | Lucas, spritesheet com 9 quadros (frente, costas e lado, 3 de cada para andar) | Criado pelo autor (script) | CC0 |
+| `player.png` | Rafael (personagem principal), spritesheet com 9 quadros (frente, costas e lado, 3 de cada para andar) | Criado pelo autor (script) | CC0 |
 | `enemy.png` | Inimigo "fantasminha", 2 quadros | Criado pelo autor (script) | CC0 |
 | `crystal.png` | Cristal coletável | Criado pelo autor (script) | CC0 |
 | `portal-locked.png` | Portal bloqueado (anel cinza) | Criado pelo autor (script) | CC0 |

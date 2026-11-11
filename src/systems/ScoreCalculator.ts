@@ -2,6 +2,7 @@
 // ScoreCalculator.ts — calcula pontos e estrelas da partida.
 //
 //   pontos = 1000 + (tempo restante × 10) − (danos × 100), mínimo 0
+//   e depois × multiplicador da dificuldade (Fácil 0,8 ... Expert 1,6)
 //   estrelas: 3 se sobrou mais de 50% do tempo,
 //             2 se sobrou mais de 25%, senão 1.
 // Na derrota não há pontos nem estrelas.
@@ -19,11 +20,13 @@ export class ScoreCalculator {
    * @param timeLeft  segundos restantes no cronômetro
    * @param timeLimit tempo total da fase
    * @param damage    quantas vezes foi atingido
+   * @param multiplier multiplicador da dificuldade
    */
-  static calculate(victory: boolean, timeLeft: number, timeLimit: number, damage: number): Score {
+  static calculate(victory: boolean, timeLeft: number, timeLimit: number, damage: number, multiplier = 1): Score {
     if (!victory) return { points: 0, stars: 0 };
 
-    const points = Math.max(0, SCORE.base + timeLeft * SCORE.perSecondLeft - damage * SCORE.perDamage);
+    const basePoints = Math.max(0, SCORE.base + timeLeft * SCORE.perSecondLeft - damage * SCORE.perDamage);
+    const points = Math.round(basePoints * multiplier);
 
     const ratio = timeLeft / timeLimit; // fração do tempo que sobrou (0 a 1)
     let stars = 1;

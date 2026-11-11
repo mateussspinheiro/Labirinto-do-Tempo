@@ -6,11 +6,13 @@
 //  - os outros símbolos viram chão e têm sua posição guardada
 //    (jogador, cristais, portal, inimigos) para a GameScene criar
 //    as entidades.
+// Depois desenha as bordas neon: uma linha de luz em cada lado de
+// parede que encosta no chão (contorna todos os corredores).
 // =============================================================
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, HUD_HEIGHT, MAP_CHARS, TEXTURES, TILE_SIZE } from '../config/constants';
+import { GAME_WIDTH, GAME_HEIGHT, GLOW, HUD_HEIGHT, MAP_CHARS, TEXTURES, TILE_SIZE } from '../config/constants';
 import type { LevelData, PatrolPath, Point } from '../types';
-import { theme } from '../ui/Theme';
+import { addGlow, theme } from '../ui/Theme';
 
 /** Resultado da leitura do mapa. */
 export interface LoadedLevel {
@@ -88,7 +90,47 @@ export class LevelLoader {
       });
     });
 
+    this.drawNeonEdges();
     return result;
+  }
+
+  /** Verdadeiro se (col, row) é chão (qualquer símbolo que não seja parede). */
+  private isFloor(col: number, row: number): boolean {
+    const char = this.level.mapa[row]?.[col];
+    return char !== undefined && char !== MAP_CHARS.WALL;
+  }
+
+  /**
+   * Bordas neon: para cada parede, olha os 4 vizinhos; onde o vizinho
+   * é chão, desenha uma linha naquele lado do tile. O resultado é um
+   * contorno de luz em volta de todos os corredores.
+   */
+  private drawNeonEdges(): void {
+    const g = this.scene.add.graphics();
+    g.lineStyle(theme.highContrast ? 3 : 2, theme.highContrast ? 0xffffff : theme.colors.primary, 1);
+
+    this.level.mapa.forEach((line, row) => {
+      [...line].forEach((char, col) => {
+        if (char !== MAP_CHARS.WALL) return;
+        const left = this.offset.x + col * TILE_SIZE;
+        const top = this.offset.y + row * TILE_SIZE;
+        const right = left + TILE_SIZE;
+        const bottom = top + TILE_SIZE;
+        if (this.isFloor(col, row - 1)) g.lineBetween(left, top, right, top); // em cima
+        if (this.isFloor(col, row + 1)) g.lineBetween(left, bottom, right, bottom); // embaixo
+        if (this.isFloor(col - 1, row)) g.lineBetween(left, top, left, bottom); // esquerda
+        if (this.isFloor(col + 1, row)) g.lineBetween(right, top, right, bottom); // direita
+      });
+    });
+
+    // Moldura magenta em volta do labirinto inteiro
+    const width = this.level.mapa[0].length * TILE_SIZE;
+    const height = this.level.mapa.length * TILE_SIZE;
+    g.lineStyle(2, theme.colors.secondary, 1).strokeRect(this.offset.x, this.offset.y, width, height);
+
+    // Brilho neon que "respira" (a luz pulsa devagar)
+    addGlow(g, theme.colors.primary, GLOW.soft);
+    this.scene.tweens.add({ targets: g, alpha: 0.7, duration: 1400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 
   /**
@@ -97,8 +139,7 @@ export class LevelLoader {
    * (até bater numa parede) e escolhe o mais comprido.
    */
   private findPatrolPath(col: number, row: number): PatrolPath {
-    const isFree = (c: number, r: number) =>
-      this.level.mapa[r]?.[c] !== undefined && this.level.mapa[r][c] !== MAP_CHARS.WALL;
+    const isFree = (c: number, r: number) => this.isFloor(c, r);
 
     // Anda para cada lado enquanto não encontrar parede
     let left = col;

@@ -1,6 +1,13 @@
 // =============================================================
 // types/index.ts — tipos (formatos de dados) usados no jogo.
 // =============================================================
+import type { DIFFICULTIES } from '../config/constants';
+
+/** Uma dificuldade (veja DIFFICULTIES em constants.ts). */
+export type Difficulty = (typeof DIFFICULTIES)[number];
+
+/** Identificador da dificuldade: 'facil' | 'medio' | 'dificil' | 'expert'. */
+export type DifficultyId = Difficulty['id'];
 
 /** Dados de uma fase: o mapa em texto e suas regras. */
 export interface LevelData {
@@ -39,11 +46,14 @@ export interface Settings {
   altoContraste: boolean;
   /** Acessibilidade: textos 20% maiores. */
   textoGrande: boolean;
+  /** Dificuldade escolhida no menu. */
+  dificuldade: DifficultyId;
 }
 
 /** Resultado de uma partida, enviado para a ResultScene. */
 export interface LevelResult {
   levelId: number;
+  difficultyId: DifficultyId;
   victory: boolean;
   /** Segundos que sobraram no cronômetro. */
   timeLeft: number;
@@ -51,6 +61,8 @@ export interface LevelResult {
   timeUsed: number;
   /** Quantas vezes o jogador foi atingido. */
   damage: number;
+  /** Tempo total da fase nesta dificuldade. */
+  timeLimit: number;
   points: number;
   /** 0 a 3 (derrota = 0). */
   stars: number;
@@ -67,9 +79,12 @@ export interface LevelProgress {
   bestStars: number;
 }
 
-/** Tudo o que é salvo sobre o progresso: uma entrada por fase (chave = id). */
+/**
+ * Tudo o que é salvo sobre o progresso. Cada dificuldade tem o seu
+ * próprio progresso: progress[dificuldade][idDaFase].
+ */
 export interface SaveData {
-  levels: Record<number, LevelProgress>;
+  progress: Partial<Record<DifficultyId, Record<number, LevelProgress>>>;
   /** Se a dica inicial da fase 1 já foi mostrada. */
   tipShown?: boolean;
 }

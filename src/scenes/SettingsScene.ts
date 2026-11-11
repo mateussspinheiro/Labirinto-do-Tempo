@@ -14,7 +14,7 @@ import { Button, ButtonGroup } from '../ui/Button';
 import { showConfirmDialog } from '../ui/ConfirmDialog';
 import { addScreenFrame } from '../ui/ScreenFrame';
 import { Slider } from '../ui/Slider';
-import { setHighContrast, setLargeText, textStyle, theme } from '../ui/Theme';
+import { setHighContrast, setLargeText, textStyle, theme, titleStyle } from '../ui/Theme';
 
 /** Intervalo mínimo (ms) entre os sons de teste ao arrastar o slider. */
 const PREVIEW_INTERVAL = 150;
@@ -50,7 +50,7 @@ export class SettingsScene extends Phaser.Scene {
     const backButton = addScreenFrame(this, 'Configurações');
 
     // ================= Coluna da esquerda: ÁUDIO =================
-    this.add.text(LEFT_X, 120, 'Áudio', textStyle(24, theme.text.muted, true)).setOrigin(0.5);
+    this.add.text(LEFT_X, 120, 'ÁUDIO', titleStyle(15, theme.text.muted)).setOrigin(0.5);
 
     // Cada slider chama o método correspondente do AudioManager
     const masterSlider = new Slider(this, LEFT_X, 190, 'Volume geral', settings.volumeGeral, (value) => {
@@ -80,7 +80,7 @@ export class SettingsScene extends Phaser.Scene {
     );
 
     // ============ Coluna da direita: ACESSIBILIDADE e PROGRESSO ============
-    this.add.text(RIGHT_X, 120, 'Acessibilidade', textStyle(24, theme.text.muted, true)).setOrigin(0.5);
+    this.add.text(RIGHT_X, 120, 'ACESSIBILIDADE', titleStyle(15, theme.text.muted)).setOrigin(0.5);
 
     const onOff = (value: boolean) => (value ? 'sim' : 'não');
     // Ao mudar a aparência, a tela é reaberta para já mostrar o novo visual
@@ -107,7 +107,7 @@ export class SettingsScene extends Phaser.Scene {
       { width: COLUMN_BUTTON_WIDTH },
     );
 
-    this.add.text(RIGHT_X, 330, 'Progresso', textStyle(24, theme.text.muted, true)).setOrigin(0.5);
+    this.add.text(RIGHT_X, 330, 'PROGRESSO', titleStyle(15, theme.text.muted)).setOrigin(0.5);
     const clearButton = new Button(
       this,
       RIGHT_X,

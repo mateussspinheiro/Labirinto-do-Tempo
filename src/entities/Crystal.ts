@@ -4,8 +4,9 @@
 // cresce, some e é destruído.
 // =============================================================
 import Phaser from 'phaser';
-import { EFFECT_COLORS, TEXTURES } from '../config/constants';
+import { EFFECT_COLORS, GLOW, TEXTURES } from '../config/constants';
 import { burstParticles } from '../ui/Effects';
+import { addGlow, theme } from '../ui/Theme';
 
 /** Tamanho da área de toque do cristal (menor que a imagem). */
 const BODY_SIZE = 20;
@@ -19,6 +20,8 @@ export class Crystal extends Phaser.Physics.Arcade.Image {
     // Corpo estático: não se move, só serve para detectar o toque do jogador
     scene.physics.add.existing(this, true);
     (this.body as Phaser.Physics.Arcade.StaticBody).setSize(BODY_SIZE, BODY_SIZE);
+
+    addGlow(this, theme.colors.primary, GLOW.soft); // brilho de energia
 
     // Animação de "flutuar" para chamar a atenção
     scene.tweens.add({ targets: this, y: y - 4, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });

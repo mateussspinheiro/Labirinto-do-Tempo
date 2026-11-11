@@ -17,28 +17,34 @@ export const GAME_HEIGHT = 600;
  * que troca para a paleta de alto contraste quando ela está ligada.
  */
 export const COLORS = {
-  background: 0x0b0e1a,
-  panel: 0x161b33,
-  primary: 0x4fc3f7,
-  accent: 0xffd54f,
-  buttonIdle: 0x283069,
-  buttonFocus: 0x3949ab,
-  buttonDisabled: 0x2a2d3e,
-  buttonBorder: 0x7986cb,
-  danger: 0xef5350,
-  hudBackground: 0x0f1328,
-  hudBorder: 0x3949ab,
+  background: 0x05070f, // quase preto azulado
+  backgroundTop: 0x070b1d, // topo do degradê do fundo
+  backgroundBottom: 0x12051f, // base do degradê (roxo escuro)
+  panel: 0x0a1226,
+  primary: 0x00e5ff, // ciano neon
+  secondary: 0xff2bd6, // magenta neon
+  accent: 0xffd54f, // dourado (destaques)
+  grid: 0x1de9ff, // linhas da grade do fundo
+  buttonIdle: 0x0a1630,
+  buttonFocus: 0x0f2f4f,
+  buttonDisabled: 0x0b0f1c,
+  buttonBorder: 0x2a7fa8,
+  danger: 0xff4d6d,
+  hudBackground: 0x050a18,
+  hudBorder: 0x00e5ff,
 };
 
 /** As mesmas cores em formato texto (CSS), usadas pelos objetos de texto. */
 export const TEXT_COLORS = {
-  title: '#ffd54f',
-  normal: '#e8eaf6',
-  success: '#81c784',
-  danger: '#ef5350',
-  portalOpen: '#ce93d8',
-  muted: '#9fa8da',
-  disabled: '#5c6080',
+  title: '#7df9ff', // ciano claro
+  normal: '#e6f1ff',
+  success: '#5dffa0',
+  danger: '#ff4d6d',
+  portalOpen: '#e07bff',
+  muted: '#7f9cc8',
+  disabled: '#3d4a66',
+  highlight: '#ffd54f',
+  secondary: '#ff6be6',
 };
 
 // ---------------- Acessibilidade ----------------
@@ -46,9 +52,13 @@ export const TEXT_COLORS = {
 /** Alto contraste: fundo preto, texto branco e destaques em amarelo forte. */
 export const HIGH_CONTRAST_COLORS: typeof COLORS = {
   background: 0x000000,
+  backgroundTop: 0x000000,
+  backgroundBottom: 0x000000,
   panel: 0x000000,
   primary: 0x00e5ff,
+  secondary: 0xffffff,
   accent: 0xffff00,
+  grid: 0x000000,
   buttonIdle: 0x000000,
   buttonFocus: 0x333300,
   buttonDisabled: 0x000000,
@@ -66,28 +76,45 @@ export const HIGH_CONTRAST_TEXT_COLORS: typeof TEXT_COLORS = {
   portalOpen: '#ff80ff',
   muted: '#ffffff',
   disabled: '#9e9e9e',
+  highlight: '#ffff00',
+  secondary: '#ffffff',
 };
 
 /** "Texto maior": todas as fontes ficam 20% maiores. */
 export const LARGE_TEXT_SCALE = 1.2;
 
-/** Fonte padrão de todos os textos. */
-export const FONT_FAMILY = 'Arial, Helvetica, sans-serif';
+/**
+ * Fontes (incluídas no projeto pelo pacote @fontsource, licença OFL):
+ *  - TITLE: Orbitron, com cara de tecnologia, para títulos, botões e números;
+ *  - BODY: Exo 2, mais fácil de ler, para os textos corridos.
+ */
+export const FONTS = {
+  TITLE: 'Orbitron, Arial, sans-serif',
+  BODY: '"Exo 2", Arial, sans-serif',
+};
 
 /** Tamanhos padrão dos botões. */
 export const BUTTON = {
   width: 280,
-  height: 52,
-  fontSize: 22,
-  spacing: 66, // distância vertical entre botões empilhados
+  height: 48,
+  fontSize: 17,
+  spacing: 60, // distância vertical entre botões empilhados
+  corner: 12, // tamanho do "corte" diagonal nos cantos
+};
+
+/** Força do brilho neon (filtro Glow do Phaser 4). */
+export const GLOW = {
+  title: 4,
+  soft: 3,
+  strong: 8,
 };
 
 /** Tamanhos do controle deslizante (Slider). */
 export const SLIDER = {
   width: 300,
   trackHeight: 10,
-  handleRadius: 11,
-  fontSize: 20,
+  handleRadius: 10,
+  fontSize: 14,
 };
 
 // ---------------- Labirinto ----------------
@@ -96,7 +123,7 @@ export const SLIDER = {
 export const TILE_SIZE = 32;
 
 /** Altura da faixa do HUD no topo da tela (o labirinto fica abaixo dela). */
-export const HUD_HEIGHT = 48;
+export const HUD_HEIGHT = 52;
 
 /** Símbolos usados nos mapas de texto das fases. */
 export const MAP_CHARS = {
@@ -150,6 +177,20 @@ export const ANIMS = {
   enemyFrameRate: 4,
 } as const;
 
+/** Tela de carregamento: tempo mínimo (ms) para a animação aparecer inteira. */
+export const LOADING = {
+  minDuration: 2200,
+  segments: 24, // quantidade de "gomos" da barra
+  messages: [
+    'Inicializando núcleo temporal...',
+    'Gerando labirintos...',
+    'Carregando cristais de energia...',
+    'Calibrando portais...',
+    'Despertando os monstros...',
+    'Sistema pronto!',
+  ],
+};
+
 /** Duração (ms) do escurecimento (fade) nas trocas de tela. */
 export const FADE_MS = 250;
 
@@ -183,10 +224,77 @@ export const LEVEL_END_DELAY = 1200;
 /** Cronômetro: a partir de quantos segundos restantes o tempo fica vermelho. */
 export const TIME_WARNING_SECONDS = 10;
 
+// ---------------- Dificuldades ----------------
+
+/**
+ * Modos de dificuldade. Cada um multiplica o tempo da fase e a
+ * velocidade dos monstros, define quantos segundos o dano tira e
+ * multiplica a pontuação final (quanto mais difícil, mais pontos).
+ * Cada dificuldade tem o seu próprio progresso salvo.
+ */
+export const DIFFICULTIES = [
+  {
+    id: 'facil',
+    nome: 'Fácil',
+    cor: 0x5dffa0,
+    descricao: 'Mais tempo e monstros lentos',
+    tempo: 1.4,
+    velocidade: 0.7,
+    dano: 3,
+    pontos: 0.8,
+  },
+  {
+    id: 'medio',
+    nome: 'Médio',
+    cor: 0x00e5ff,
+    descricao: 'O desafio equilibrado',
+    tempo: 1.0,
+    velocidade: 1.0,
+    dano: 5,
+    pontos: 1.0,
+  },
+  {
+    id: 'dificil',
+    nome: 'Difícil',
+    cor: 0xffa726,
+    descricao: 'Menos tempo e monstros rápidos',
+    tempo: 0.85,
+    velocidade: 1.3,
+    dano: 7,
+    pontos: 1.3,
+  },
+  {
+    id: 'expert',
+    nome: 'Expert',
+    cor: 0xff4d6d,
+    descricao: 'Para mestres do labirinto',
+    tempo: 0.7,
+    velocidade: 1.5,
+    dano: 10,
+    pontos: 1.6,
+  },
+] as const;
+
+/** Dificuldade usada na primeira vez que o jogo é aberto. */
+export const DEFAULT_DIFFICULTY = 'medio';
+
+/** Posição e tamanho do quadro com a ilustração animada do menu. */
+export const MENU_ART_FRAME = { x: 30, y: 128, width: 390, height: 318 };
+
+// ---------------- Mapa de fases ----------------
+
+export const LEVEL_MAP = {
+  nodeRadius: 36, // tamanho do hexágono de cada fase
+  areaLeft: 110, // área onde os nós são distribuídos
+  areaRight: 690,
+  rowY: 300, // altura central da linha de fases
+  zigzag: 70, // sobe/desce alternado entre as fases
+  walkMs: 450, // tempo do Rafael andando de uma fase para outra
+};
+
 // ---------------- Obstáculos ----------------
 
 export const OBSTACLE = {
-  damageSeconds: 5, // segundos que o jogador perde ao ser tocado
   invulnerableMs: 1500, // tempo de invencibilidade depois do dano
   blinkMs: 100, // velocidade do "piscar" do jogador
   bodySize: 22,
@@ -254,7 +362,8 @@ export const SCENES = {
   PRELOAD: 'PreloadScene',
   WELCOME: 'WelcomeScene',
   MENU: 'MenuScene',
-  LEVEL_SELECT: 'LevelSelectScene',
+  MENU_ART: 'MenuArtScene',
+  LEVEL_MAP: 'LevelMapScene',
   GAME: 'GameScene',
   HUD: 'HudScene',
   PAUSE: 'PauseScene',

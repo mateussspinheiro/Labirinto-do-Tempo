@@ -8,7 +8,7 @@ Autor: **Mateus Gomes Pinheiro**.
 
 ## O jogo
 
-Lucas está preso em um labirinto e o tempo está correndo. Em cada fase o jogador precisa:
+Rafael está preso em um labirinto e o tempo está correndo. Em cada fase o jogador precisa:
 
 1. explorar o labirinto e **coletar os 3 cristais**;
 2. com os 3 cristais, o **portal é liberado** (muda de cinza para roxo e começa a brilhar);
@@ -64,6 +64,8 @@ npm run build    # verifica os tipos (TypeScript) e gera a versão final em dist
 npm run preview  # roda a versão final em http://localhost:4173
 npm run sprites  # gera de novo as imagens em public/assets/images
 npm run format   # formata o código com o Prettier
+npm run test:volume  # teste automático do volume no navegador (Playwright); screenshots em docs/
+                     # (na primeira vez: npx playwright install chromium)
 ```
 
 ## Tecnologias
@@ -85,7 +87,7 @@ O jogo é dividido em **cenas do Phaser**, seguindo a arquitetura da informaçã
 
 ```
 Boas-vindas → Menu Principal → { Jogar, Como Jogar, Progresso, Configurações, Ajuda }
-Jogar → Seleção de Fase → Partida (HUD + Pausa) → Resultado → próxima fase / menu
+Jogar → Mapa de Fases (com dificuldade) → Partida (HUD + Pausa) → Resultado → próxima fase / menu
 ```
 
 - O menu tem só 5 opções, e toda tela secundária tem um botão "Voltar ao menu" (ou ESC).
@@ -107,12 +109,13 @@ labirinto-do-tempo/
     ├── main.ts                # cria o Phaser.Game com a lista de cenas
     ├── config/constants.ts    # TODAS as constantes: cores, tamanhos, teclas, chaves do localStorage
     ├── types/index.ts         # tipos: LevelData, Settings, LevelResult, SaveData...
-    ├── scenes/                # uma cena por tela (Boot, Preload, Welcome, Menu, LevelSelect,
+    ├── scenes/                # uma cena por tela (Boot, Preload, Welcome, Menu, MenuArt, LevelMap,
     │                          #   Game, Hud, Pause, Result, HowToPlay, Progress, Settings, Help)
     ├── entities/              # Player, Crystal, Portal, Obstacle
-    ├── systems/               # AudioManager, SoundSynth, SaveManager, LevelLoader, ScoreCalculator
+    ├── systems/               # AudioManager, SoundSynth, SaveManager, LevelLoader, ScoreCalculator, Difficulty
     ├── levels/                # level1.ts, level2.ts, level3.ts (mapas em texto) e index.ts
-    └── ui/                    # Button, Slider, ScreenFrame, ConfirmDialog, Theme, Transition, Effects
+    └── ui/                    # Button, Slider, Panel, ScreenFrame, ConfirmDialog, Theme, Transition, Effects,
+                               #   TechBackground, LevelNode, DifficultySelector
 ```
 
 ### Fases em texto

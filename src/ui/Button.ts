@@ -1,14 +1,16 @@
 // =============================================================
 // Button.ts — botão reutilizável que funciona com mouse e teclado.
 //
-// - Button: um retângulo com texto. Clique do mouse aciona o botão.
+// - Button: painel com cantos cortados, borda neon e texto na fonte
+//   Orbitron. Selecionado, ele acende (brilho + barra lateral).
 // - ButtonGroup: junta vários botões (ou sliders) e deixa o jogador
 //   escolher com as setas (ou W/S) e confirmar com Enter ou Espaço.
 // =============================================================
 import Phaser from 'phaser';
-import { BUTTON, SOUNDS } from '../config/constants';
+import { BUTTON, GLOW, SOUNDS } from '../config/constants';
 import { AudioManager } from '../systems/AudioManager';
-import { textStyle, theme } from './Theme';
+import { drawPanel } from './Panel';
+import { addGlow, theme, titleStyle } from './Theme';
 
 /**
  * Qualquer elemento que pode receber o foco do teclado (botão ou slider).
@@ -21,7 +23,7 @@ export interface Focusable {
   press(): void;
   /** Avisado quando o mouse passa por cima. */
   onHover?: () => void;
-  /** Setas esquerda/direita (só sliders usam). */
+  /** Setas esquerda/direita (sliders e seletores usam). */
   adjust?(direction: number): void;
 }
 
@@ -33,11 +35,14 @@ export interface ButtonOptions {
 }
 
 export class Button extends Phaser.GameObjects.Container implements Focusable {
-  private background: Phaser.GameObjects.Rectangle;
+  private background: Phaser.GameObjects.Graphics;
   private label: Phaser.GameObjects.Text;
+  private glow: Phaser.Filters.Glow | null;
   private onClick: () => void;
   private focused = false;
   private enabled = true;
+  private buttonWidth: number;
+  private buttonHeight: number;
 
   /** Chamado quando o mouse passa por cima (o ButtonGroup usa para mover o foco). */
   public onHover?: () => void;
@@ -52,26 +57,28 @@ export class Button extends Phaser.GameObjects.Container implements Focusable {
   ) {
     super(scene, x, y);
     this.onClick = onClick;
+    this.buttonWidth = options.width ?? BUTTON.width;
+    this.buttonHeight = options.height ?? BUTTON.height;
 
-    const width = options.width ?? BUTTON.width;
-    const height = options.height ?? BUTTON.height;
+    // Fundo desenhado com Graphics (redesenhado a cada mudança de estado)
+    this.background = scene.add.graphics();
+    // Brilho neon: criado uma vez e só ligado quando o botão está selecionado
+    this.glow = addGlow(this.background, theme.colors.primary, GLOW.soft);
 
-    // Fundo do botão (centralizado no ponto x,y do container)
-    this.background = scene.add
-      .rectangle(0, 0, width, height, theme.colors.buttonIdle)
-      .setStrokeStyle(2, theme.colors.buttonBorder);
-
+    // Texto em maiúsculas, com espaço entre as letras (visual tecnológico)
     this.label = scene.add
-      .text(0, 0, text, textStyle(options.fontSize ?? BUTTON.fontSize, theme.text.normal, true))
-      .setOrigin(0.5);
+      .text(0, 0, text.toUpperCase(), titleStyle(options.fontSize ?? BUTTON.fontSize, theme.text.normal))
+      .setOrigin(0.5)
+      .setLetterSpacing(2);
 
-    this.add([this.background, this.label]);
+    // Área invisível que recebe o mouse
+    const hitArea = scene.add.zone(0, 0, this.buttonWidth, this.buttonHeight).setInteractive({ useHandCursor: true });
+    hitArea.on('pointerover', () => this.onHover?.());
+    hitArea.on('pointerdown', () => this.press());
+
+    this.add([this.background, this.label, hitArea]);
     scene.add.existing(this);
-
-    // Eventos do mouse ficam no retângulo de fundo
-    this.background.setInteractive({ useHandCursor: true });
-    this.background.on('pointerover', () => this.onHover?.());
-    this.background.on('pointerdown', () => this.press());
+    this.refresh();
   }
 
   /** Aciona o botão (mesmo efeito do clique). */
@@ -90,7 +97,7 @@ export class Button extends Phaser.GameObjects.Container implements Focusable {
     return this;
   }
 
-  /** Habilita ou desabilita o botão (desabilitado fica cinza e não responde). */
+  /** Habilita ou desabilita o botão (desabilitado fica apagado e não responde). */
   setEnabled(value: boolean): this {
     this.enabled = value;
     this.refresh();
@@ -102,26 +109,45 @@ export class Button extends Phaser.GameObjects.Container implements Focusable {
   }
 
   setText(text: string): this {
-    this.label.setText(text);
+    this.label.setText(text.toUpperCase());
     return this;
   }
 
-  /** Atualiza cores conforme o estado (normal, focado, desabilitado). */
+  /** Redesenha conforme o estado: normal, selecionado ou desabilitado. */
   private refresh(): void {
+    const g = this.background;
+    const w = this.buttonWidth;
+    const h = this.buttonHeight;
+    const active = this.enabled && this.focused;
+    g.clear();
+
     if (!this.enabled) {
-      this.background.setFillStyle(theme.colors.buttonDisabled);
-      this.background.setStrokeStyle(2, theme.colors.buttonDisabled);
+      drawPanel(g, 0, 0, w, h, {
+        fill: theme.colors.buttonDisabled,
+        fillAlpha: 0.8,
+        border: theme.colors.buttonDisabled,
+        borderWidth: 1,
+        corner: BUTTON.corner,
+      });
       this.label.setColor(theme.text.disabled);
-      this.setScale(1);
-      return;
+    } else {
+      drawPanel(g, 0, 0, w, h, {
+        fill: active ? theme.colors.buttonFocus : theme.colors.buttonIdle,
+        fillAlpha: active ? 0.95 : 0.8,
+        border: active ? theme.colors.primary : theme.colors.buttonBorder,
+        borderWidth: active ? 2.5 : 1.5,
+        corner: BUTTON.corner,
+      });
+      if (active) {
+        // Barra de destaque à esquerda e "seta" de seleção
+        g.fillStyle(theme.colors.primary, 1).fillRect(-w / 2 + 6, -h / 2 + BUTTON.corner, 3, h - BUTTON.corner * 1.5);
+        g.fillTriangle(w / 2 - 22, -5, w / 2 - 22, 5, w / 2 - 14, 0);
+      }
+      this.label.setColor(active ? theme.text.title : theme.text.normal);
     }
-    this.background.setFillStyle(this.focused ? theme.colors.buttonFocus : theme.colors.buttonIdle);
-    this.background.setStrokeStyle(
-      this.focused ? 3 : 2,
-      this.focused ? theme.colors.accent : theme.colors.buttonBorder,
-    );
-    this.label.setColor(this.focused ? theme.text.title : theme.text.normal);
-    this.setScale(this.focused ? 1.05 : 1);
+
+    if (this.glow) this.glow.active = active; // brilho só no botão selecionado
+    this.setScale(active ? 1.04 : 1);
   }
 }
 

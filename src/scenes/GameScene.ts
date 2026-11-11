@@ -1,8 +1,8 @@
 // =============================================================
 // GameScene — a partida: monta o labirinto da fase, controla o
 // jogador, os cristais, o portal, os obstáculos e o cronômetro.
-// Recebe o id da fase pela LevelSelectScene e abre a HudScene
-// em paralelo.
+// Recebe o id da fase pelo mapa de fases (LevelMapScene), aplica a
+// dificuldade escolhida e abre a HudScene em paralelo.
 //
 // Toda informação para o HUD sai daqui como EVENTO em this.game.events.
 // =============================================================
@@ -12,7 +12,7 @@ import {
   GAME_EVENTS,
   CRYSTALS_TO_UNLOCK,
   LEVEL_END_DELAY,
-  OBSTACLE,
+  GLOW,
   SOUNDS,
   GAME_WIDTH,
   GAME_HEIGHT,
@@ -23,14 +23,16 @@ import { Player } from '../entities/Player';
 import { Portal } from '../entities/Portal';
 import { getLevel } from '../levels';
 import { AudioManager } from '../systems/AudioManager';
+import { enemySpeed, getCurrentDifficulty, levelTime } from '../systems/Difficulty';
 import { LevelLoader } from '../systems/LevelLoader';
 import { SaveManager } from '../systems/SaveManager';
 import { ScoreCalculator } from '../systems/ScoreCalculator';
-import type { LevelData, LevelResult } from '../types';
-import { textStyle, theme } from '../ui/Theme';
+import type { Difficulty, LevelData, LevelResult } from '../types';
+import { addTechBackground } from '../ui/TechBackground';
+import { addGlow, theme, titleStyle } from '../ui/Theme';
 import type { HudSceneData } from './HudScene';
 import type { PauseSceneData } from './PauseScene';
-import { fadeOut, goToScene } from '../ui/Transition';
+import { goToScene } from '../ui/Transition';
 
 /** Dados recebidos ao iniciar a cena. */
 export interface GameSceneData {
@@ -39,6 +41,9 @@ export interface GameSceneData {
 
 export class GameScene extends Phaser.Scene {
   private level!: LevelData;
+  private difficulty!: Difficulty;
+  /** Tempo total da fase já ajustado pela dificuldade. */
+  private timeLimit = 0;
   private player!: Player;
   private portal!: Portal;
   private crystalsCollected = 0;
@@ -56,15 +61,18 @@ export class GameScene extends Phaser.Scene {
   init(data: GameSceneData): void {
     // Se a fase não existir (não deveria acontecer), volta para a fase 1
     this.level = getLevel(data.levelId) ?? getLevel(1)!;
+    this.difficulty = getCurrentDifficulty();
+    this.timeLimit = levelTime(this.level, this.difficulty);
     // A mesma instância da cena é reaproveitada: zera o estado a cada partida
     this.crystalsCollected = 0;
-    this.timeLeft = this.level.tempoLimite;
+    this.timeLeft = this.timeLimit;
     this.damageCount = 0;
     this.finished = false;
   }
 
   create(): void {
-    // 1) Monta o labirinto a partir do mapa de texto
+    // 1) Fundo tecnológico e o labirinto montado a partir do mapa de texto
+    addTechBackground(this, { variant: 'game' });
     const loaded = new LevelLoader(this, this.level).load();
 
     // 2) Portal e cristais (criados antes do jogador para ficarem "por baixo" dele)
@@ -73,7 +81,9 @@ export class GameScene extends Phaser.Scene {
 
     // 3) Jogador na posição 'P' do mapa e inimigos nas posições 'E'
     this.player = new Player(this, loaded.playerStart.x, loaded.playerStart.y, loaded.offset);
-    const obstacles = loaded.enemies.map((path) => new Obstacle(this, path, this.level.velocidadeObstaculos));
+    // A velocidade dos monstros depende da dificuldade
+    const speed = enemySpeed(this.level, this.difficulty);
+    const obstacles = loaded.enemies.map((path) => new Obstacle(this, path, speed));
 
     // 4) Física: colisão com paredes e "sobreposição" (overlap) com os objetos.
     //    collider = bloqueia o movimento; overlap = só avisa que encostou.
@@ -86,7 +96,7 @@ export class GameScene extends Phaser.Scene {
     // Primeira vez na fase 1? O HUD mostra a dica do objetivo.
     const showTip = this.level.id === 1 && SaveManager.shouldShowTip();
     if (showTip) SaveManager.markTipShown();
-    const hudData: HudSceneData = { totalCrystals: CRYSTALS_TO_UNLOCK, timeLimit: this.level.tempoLimite, showTip };
+    const hudData: HudSceneData = { totalCrystals: CRYSTALS_TO_UNLOCK, timeLimit: this.timeLimit, showTip };
     this.scene.launch(SCENES.HUD, hudData);
 
     // 6) Cronômetro: a cada 1 segundo chama tick(). O relógio da cena
@@ -190,8 +200,9 @@ export class GameScene extends Phaser.Scene {
     this.player.hurt();
     AudioManager.get().playSfx(SOUNDS.HIT);
     this.cameras.main.shake(150, 0.008); // tremidinha na tela
-    this.game.events.emit(GAME_EVENTS.PLAYER_HIT, OBSTACLE.damageSeconds);
-    this.changeTime(-OBSTACLE.damageSeconds);
+    // Quantos segundos o dano tira depende da dificuldade
+    this.game.events.emit(GAME_EVENTS.PLAYER_HIT, this.difficulty.dano);
+    this.changeTime(-this.difficulty.dano);
   }
 
   /** Jogador encostou no portal: só conclui a fase se ele estiver liberado. */
@@ -212,12 +223,20 @@ export class GameScene extends Phaser.Scene {
     audio.stopMusic();
     audio.playSfx(victory ? SOUNDS.VICTORY : SOUNDS.DEFEAT);
 
-    const score = ScoreCalculator.calculate(victory, this.timeLeft, this.level.tempoLimite, this.damageCount);
+    const score = ScoreCalculator.calculate(
+      victory,
+      this.timeLeft,
+      this.timeLimit,
+      this.damageCount,
+      this.difficulty.pontos,
+    );
     const result: LevelResult = {
       levelId: this.level.id,
+      difficultyId: this.difficulty.id,
       victory,
       timeLeft: this.timeLeft,
-      timeUsed: this.level.tempoLimite - this.timeLeft,
+      timeUsed: this.timeLimit - this.timeLeft,
+      timeLimit: this.timeLimit,
       damage: this.damageCount,
       points: score.points,
       stars: score.stars,
@@ -227,16 +246,18 @@ export class GameScene extends Phaser.Scene {
     result.newRecord = SaveManager.saveResult(result);
 
     // Mensagem rápida antes de trocar de tela
-    const text = victory ? 'Fase concluída!' : 'Tempo esgotado!';
-    const color = victory ? theme.text.success : theme.text.danger;
-    this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, text, textStyle(44, color, true))
+    const text = victory ? 'FASE CONCLUÍDA!' : 'TEMPO ESGOTADO!';
+    const color = victory ? theme.colors.primary : theme.colors.danger;
+    const message = this.add
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, text, titleStyle(38, victory ? theme.text.success : theme.text.danger))
       .setOrigin(0.5)
-      .setStroke('#000000', 6);
+      .setStroke('#000000', 6)
+      .setDepth(20)
+      .setScale(0.4);
+    addGlow(message, color, GLOW.title);
+    this.tweens.add({ targets: message, scale: 1, duration: 350, ease: 'Back.easeOut' });
 
-    this.time.delayedCall(LEVEL_END_DELAY, () => {
-      fadeOut(this.scene.get(SCENES.HUD)); // o HUD escurece junto com a partida
-      goToScene(this, SCENES.RESULT, result);
-    });
+    // O HUD escurece junto (goToScene escurece todas as cenas visíveis)
+    this.time.delayedCall(LEVEL_END_DELAY, () => goToScene(this, SCENES.RESULT, result));
   }
 }

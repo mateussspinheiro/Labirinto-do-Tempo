@@ -2,7 +2,8 @@
 // Transition.ts — troca de tela com "fade" (escurece e clareia).
 //
 // Em vez de this.scene.start(...), as cenas chamam goToScene(...):
-//   1. a câmera da cena atual escurece (fadeOut);
+//   1. todas as cenas visíveis escurecem juntas (fadeOut) — por
+//      exemplo a partida e o HUD, ou o menu e a sua ilustração;
 //   2. quando termina, a próxima cena é iniciada;
 //   3. a câmera da próxima cena começa escura e clareia (fadeIn).
 // =============================================================
@@ -14,11 +15,6 @@ import { theme } from './Theme';
 function backgroundRGB(): [number, number, number] {
   const color = Phaser.Display.Color.IntegerToColor(theme.colors.background);
   return [color.red, color.green, color.blue];
-}
-
-/** Escurece a câmera de uma cena (usado também no HUD ao sair da partida). */
-export function fadeOut(scene: Phaser.Scene): void {
-  scene.cameras.main.fadeOut(FADE_MS, ...backgroundRGB());
 }
 
 /**
@@ -33,7 +29,13 @@ export function goToScene(from: Phaser.Scene, key: string, data?: object, onBefo
   // Se já está trocando de tela, ignora (evita cliques/teclas repetidos)
   if (camera.fadeEffect.isRunning) return;
 
-  fadeOut(from);
+  // Escurece todas as cenas que estão aparecendo na tela
+  // (rodando ou pausadas; cenas paradas ou dormindo não aparecem)
+  const visibleScenes = from.scene.manager
+    .getScenes(false)
+    .filter((scene) => (scene.sys.isActive() || scene.sys.isPaused()) && scene.sys.isVisible());
+  for (const scene of visibleScenes) scene.cameras.main.fadeOut(FADE_MS, ...backgroundRGB());
+
   camera.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
     onBeforeStart?.();
     from.scene.start(key, data);

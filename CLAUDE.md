@@ -33,7 +33,7 @@ Baseada em **cenas do Phaser**, seguindo a arquitetura da informação do projet
 
 ```
 Boas-vindas → Menu Principal → { Jogar, Como Jogar, Progresso, Configurações, Ajuda }
-Jogar → Seleção de Fase → Partida (HUD + Pausa) → Resultado → próxima fase / menu
+Jogar → Mapa de Fases (com dificuldade) → Partida (HUD + Pausa) → Resultado → próxima fase / menu
 ```
 
 Princípios: menu com só 5 opções; HUD mostra apenas cristais, tempo e estado do portal;
@@ -59,7 +59,8 @@ labirinto-do-tempo/
     │   ├── PreloadScene.ts       # carrega assets e mostra barra de carregamento
     │   ├── WelcomeScene.ts       # tela de boas-vindas
     │   ├── MenuScene.ts          # menu principal (5 opções)
-    │   ├── LevelSelectScene.ts   # seleção de fase (fases bloqueadas/desbloqueadas)
+    │   ├── MenuArtScene.ts       # ilustração animada do menu principal
+    │   ├── LevelMapScene.ts      # mapa de fases + seleção de dificuldade (fases bloqueadas/liberadas)
     │   ├── GameScene.ts          # partida: labirinto, jogador, cristais, portal, obstáculos
     │   ├── HudScene.ts           # HUD rodando em paralelo à GameScene
     │   ├── PauseScene.ts         # pausa: continuar, reiniciar, como jogar, menu

@@ -48,7 +48,6 @@ export class HowToPlayScene extends Phaser.Scene {
       ? addScreenFrame(this, 'Como Jogar', {
           onBack: () => this.backToPause(),
           backLabel: 'Voltar à pausa',
-          opaque: true,
         })
       : addScreenFrame(this, 'Como Jogar');
     if (this.fromPause) this.scene.bringToTop();
